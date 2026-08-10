@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════════════════════
+   manual-testing.js — Manual Testing & SDLC/STLC
+   ═══════════════════════════════════════════════════════════════ */
+var defined_sections = defined_sections || {};
+
+defined_sections['manual-testing'] = {
+  title: '📝 Manual Testing & SDLC',
+  description: 'Core concepts of SDLC, STLC, Agile, V-Model, and Shift-Left testing principles',
+  questions: [
+    {
+      id: 'MT001',
+      category: 'SDLC & STLC',
+      topic: 'SDLC vs STLC',
+      subtopic: 'Differences',
+      question: 'What is the difference between SDLC and STLC?',
+      whyAsked: 'Ensures you understand the complete software delivery lifecycle and QA\'s exact role within it.',
+      difficulty: 1,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'SDLC (Software Development Life Cycle) is the complete process of building software from requirements to deployment. STLC (Software Testing Life Cycle) is a subset of SDLC that focuses purely on testing activities like test planning, design, and execution.',
+      interviewAnswer: 'SDLC encompasses the entire project lifecycle. It involves Business Analysts gathering requirements, Architects designing the system, Developers writing the code, and QAs testing it. The phases are usually: Requirement Analysis, Design, Development, Testing, Deployment, and Maintenance.\n\nSTLC runs parallel to SDLC but focuses exclusively on quality. While developers are in the "Design/Development" phase of SDLC, I am in the "Test Planning and Test Case Design" phase of STLC. My goal is to ensure that by the time the code reaches the "Testing" phase of SDLC, my STLC execution phase is completely ready to run without delay.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | SDLC (Software Development) | STLC (Software Testing) |\n| :--- | :--- | :--- |\n| **Full Form** | Software Development Life Cycle | Software Testing Life Cycle |\n| **Goal** | Build and deliver working software | Validate software quality and find bugs |\n| **Scope** | The entire project lifecycle | A subset/phase of the SDLC |\n| **Participants**| PMs, BAs, Architects, Devs, QAs | QA Leads, SDETs, Testers |\n| **Output** | Final Software Application | Test Reports, Bug Reports, Sign-off |',
+      simpleExplanation: 'SDLC is building the entire car. STLC is just the safety inspection process for the car.',
+      realWorldExample: 'N/A',
+      projectExample: 'In my last project, we used Agile SDLC. During the 2-week sprint (SDLC), my STLC involved writing BDD scenarios during the first 3 days, building automation during development, and executing regression tests on the final day.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'What happens in the Requirement Analysis phase of STLC?',
+      followUpA: 'In this phase, QA analyzes the business requirements for testability. We identify missing logic, edge cases, and clarify ambiguities with the Product Owner before any code is written. This is the cheapest time to fix a defect.',
+      seniorFollowUpQ: 'How do you align STLC with a CI/CD pipeline?',
+      seniorFollowUpA: 'In a modern DevOps environment, STLC is fully integrated into the CI/CD pipeline. Test Planning/Design happen during Sprint Grooming. Test Execution is triggered automatically via Webhooks (e.g., Jenkins running Selenium tests when a PR is merged). Test Closure is automated via Allure/Extent reports sent to Slack.',
+      commonMistake: 'Thinking STLC only starts after development is finished.',
+      bestPractice: 'Always start STLC activities (like writing test scenarios) on Day 1 of the sprint.'
+    },
+    {
+      id: 'MT002',
+      category: 'SDLC & STLC',
+      topic: 'Methodologies',
+      subtopic: 'V-Model vs Agile',
+      question: 'Compare the V-Model methodology to Agile methodology.',
+      whyAsked: 'Tests architectural understanding of how testing fits into different development models.',
+      difficulty: 2,
+      importance: 'important',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'The V-Model is a sequential, rigid approach where testing phases map directly to development phases, making it hard to handle requirement changes. Agile is an iterative, flexible approach where development and testing happen simultaneously in short sprints.',
+      interviewAnswer: 'The **V-Model (Verification and Validation model)** is an extension of the Waterfall model. For every development phase, there is a corresponding testing phase (e.g., Unit tests for Coding, System tests for System Design). It is highly disciplined and great for projects with fixed, strict requirements (like healthcare or aviation), but it is terrible at adapting to changes.\n\n**Agile** is iterative. We build and test software in small chunks (sprints) usually lasting 2 weeks. Requirements can change at any time. Testing is not a "phase" at the end; it is a continuous activity happening daily. As an SDET, I strongly prefer Agile because it allows us to automate and test features immediately rather than waiting 6 months for a development cycle to finish.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | V-Model | Agile |\n| :--- | :--- | :--- |\n| **Approach** | Sequential / Linear | Iterative / Incremental |\n| **Flexibility** | Rigid (Hard to change requirements) | Highly flexible (Welcomes change) |\n| **Testing Phase**| Happens only after development | Continuous, happens alongside development |\n| **Best For** | Strict regulatory systems (Medical, Defense) | SaaS, Web Apps, fast-paced startups |\n| **Delivery** | One massive release at the end | Small, frequent releases (every 2 weeks) |',
+      simpleExplanation: 'V-Model is building a skyscraper — you can\'t change the foundation once you start. Agile is playing with Lego — you can swap pieces out constantly.',
+      realWorldExample: 'N/A',
+      projectExample: 'Early in my career, I worked on a banking mainframe using the V-Model. It took 6 months to see the code, and if a requirement changed, it cost thousands of dollars to fix. Now, working in Agile, I test and sign off on new features every 48 hours.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'What is Verification vs Validation?',
+      followUpA: 'Verification is checking documents and code without running the app (Are we building the product right? e.g., code reviews, requirement analysis). Validation is actually running the software to find bugs (Are we building the right product? e.g., executing Selenium tests).',
+      seniorFollowUpQ: 'Can you use Agile for a Medical Device project?',
+      seniorFollowUpA: 'Yes, but it requires "Agile with strict governance". You can develop iteratively, but you must maintain heavy traceability matrices, rigid Definition of Done criteria, and exhaustive documentation to satisfy FDA/regulatory compliance audits.',
+      commonMistake: 'Saying Agile has no documentation.',
+      bestPractice: 'Understand that Agile values "working software over comprehensive documentation," but it still requires sufficient documentation.'
+    },
+    {
+      id: 'MT003',
+      category: 'SDLC & STLC',
+      topic: 'Modern Practices',
+      subtopic: 'Shift-Left Testing',
+      question: 'WRITTEN TEST: What is "Shift-Left" testing and how have you implemented it?',
+      whyAsked: 'Shift-Left is the hottest buzzword for Senior QA roles. You must know how to implement it.',
+      difficulty: 3,
+      importance: 'must',
+      interviewType: 'Written Test',
+      thirtySecAnswer: 'Shift-Left testing means moving testing activities earlier in the SDLC (to the left). Instead of waiting for code to be finished, QA gets involved in requirement analysis, writes tests during development, and enforces unit testing.',
+      interviewAnswer: 'In traditional models, testing happens on the "right" side of the timeline (after development). **Shift-Left testing** moves quality to the "left" (the beginning of the process).\n\nThe goal is to find bugs when they are cheapest to fix. I implement Shift-Left in three ways:\n1. **Requirements Phase:** I review Jira tickets and Acceptance Criteria before a single line of code is written to find logical flaws.\n2. **TDD / BDD:** I write automated BDD scenarios (Cucumber) that developers must pass before they can merge their code.\n3. **CI/CD Integration:** I enforce static code analysis (SonarQube) and unit tests to run automatically on every Pull Request. If unit tests fail, the PR is blocked.',
+      detailedExplanation: 'The cost of fixing a bug increases exponentially over time. A logical flaw found during a grooming session costs $10 in time to fix. That same flaw found in Production could cost $10,000 in lost revenue and emergency hotfixes. Shift-Left is entirely about ROI (Return on Investment).',
+      simpleExplanation: 'Don\'t wait for the chef to finish baking the cake to taste it. Taste the batter before it goes in the oven.',
+      realWorldExample: 'N/A',
+      projectExample: 'In my last project, developers were merging buggy code that broke the QA environment daily. I implemented a Shift-Left approach by creating a pre-commit hook that ran 50 critical API tests. If the dev\'s local code failed the API tests, they couldn\'t even push their branch to Git. This stabilized our QA environment immediately.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'What is Shift-Right testing?',
+      followUpA: 'Shift-Right testing is testing in Production. It includes A/B testing, Canary deployments, Feature Flags, and monitoring logs/analytics (like Datadog or Kibana) to catch issues that only happen with real user traffic.',
+      seniorFollowUpQ: 'How do you convince developers to adopt a Shift-Left mindset?',
+      seniorFollowUpA: 'You don\'t force it; you show the value. I set up a dashboard showing how much time developers spend fixing regression bugs vs building new features. Then, I pair-program with them to show how writing tests first (TDD) actually speeds up their coding because they don\'t have to manually click through the UI to test their changes.',
+      commonMistake: 'Thinking Shift-Left just means QA writing automation faster.',
+      bestPractice: 'Shift-Left requires a cultural change where "Quality is everyone\'s responsibility," not just QA\'s.'
+    }
+  ]
+};

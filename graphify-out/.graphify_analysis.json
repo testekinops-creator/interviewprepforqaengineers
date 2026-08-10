@@ -1,0 +1,253 @@
+{
+  "communities": {
+    "0": [
+      "generate_excel",
+      "generate_excel_exceljs",
+      "generate_excel_fs",
+      "generate_excel_generateexcel",
+      "generate_excel_path"
+    ],
+    "1": [
+      "tmp_workbook_verification_verify",
+      "tmp_workbook_verification_verify_checks",
+      "tmp_workbook_verification_verify_outputdir",
+      "tmp_workbook_verification_verify_targetsheets",
+      "tmp_workbook_verification_verify_workbookpath"
+    ],
+    "2": [
+      "data_zz_curriculum_expansions",
+      "data_zz_curriculum_expansions_addsection",
+      "data_zz_curriculum_expansions_addto",
+      "data_zz_curriculum_expansions_question"
+    ],
+    "3": [
+      "exceljs",
+      "package",
+      "package_dependencies",
+      "package_dependencies_exceljs"
+    ],
+    "4": [
+      "app",
+      "app_qaapp"
+    ],
+    "5": [
+      "data_agile_scrum"
+    ],
+    "6": [
+      "data_api_scenarios"
+    ],
+    "7": [
+      "data_api_testing"
+    ],
+    "8": [
+      "data_coding_round"
+    ],
+    "9": [
+      "data_database_testing"
+    ],
+    "10": [
+      "data_defect_mgmt"
+    ],
+    "11": [
+      "data_docker_cloud"
+    ],
+    "12": [
+      "data_framework"
+    ],
+    "13": [
+      "data_git"
+    ],
+    "14": [
+      "data_hr_behavioral"
+    ],
+    "15": [
+      "data_java_coding"
+    ],
+    "16": [
+      "data_java_collections"
+    ],
+    "17": [
+      "data_java_core"
+    ],
+    "18": [
+      "data_java_strings"
+    ],
+    "19": [
+      "data_jenkins_cicd"
+    ],
+    "20": [
+      "data_linux"
+    ],
+    "21": [
+      "data_manual_testing"
+    ],
+    "22": [
+      "data_maven"
+    ],
+    "23": [
+      "data_mock_interviews"
+    ],
+    "24": [
+      "data_playwright"
+    ],
+    "25": [
+      "data_playwright_coding"
+    ],
+    "26": [
+      "data_playwright_commands"
+    ],
+    "27": [
+      "data_playwright_framework"
+    ],
+    "28": [
+      "data_project_resume"
+    ],
+    "29": [
+      "data_quick_revision"
+    ],
+    "30": [
+      "data_rest_assured"
+    ],
+    "31": [
+      "data_selenium"
+    ],
+    "32": [
+      "data_selenium_advanced"
+    ],
+    "33": [
+      "data_selenium_exceptions"
+    ],
+    "34": [
+      "data_selenium_locators"
+    ],
+    "35": [
+      "data_selenium_waits"
+    ],
+    "36": [
+      "data_senior_scenarios"
+    ],
+    "37": [
+      "data_sql"
+    ],
+    "38": [
+      "data_sql_coding"
+    ],
+    "39": [
+      "data_strategy"
+    ],
+    "40": [
+      "data_test_design"
+    ],
+    "41": [
+      "data_testng"
+    ],
+    "42": [
+      "data_tricky_questions"
+    ]
+  },
+  "cohesion": {
+    "0": 0.4,
+    "1": 0.4,
+    "2": 0.5,
+    "3": 0.5,
+    "4": 1.0,
+    "5": 1.0,
+    "6": 1.0,
+    "7": 1.0,
+    "8": 1.0,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0,
+    "16": 1.0,
+    "17": 1.0,
+    "18": 1.0,
+    "19": 1.0,
+    "20": 1.0,
+    "21": 1.0,
+    "22": 1.0,
+    "23": 1.0,
+    "24": 1.0,
+    "25": 1.0,
+    "26": 1.0,
+    "27": 1.0,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0,
+    "35": 1.0,
+    "36": 1.0,
+    "37": 1.0,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0,
+    "41": 1.0,
+    "42": 1.0
+  },
+  "gods": [
+    {
+      "id": "package_dependencies_exceljs",
+      "label": "exceljs",
+      "degree": 2
+    },
+    {
+      "id": "app_qaapp",
+      "label": "QAApp",
+      "degree": 1
+    },
+    {
+      "id": "generate_excel_fs",
+      "label": "fs",
+      "degree": 1
+    },
+    {
+      "id": "generate_excel_path",
+      "label": "path",
+      "degree": 1
+    },
+    {
+      "id": "generate_excel_exceljs",
+      "label": "ExcelJS",
+      "degree": 1
+    },
+    {
+      "id": "exceljs",
+      "label": "exceljs",
+      "degree": 1
+    },
+    {
+      "id": "tmp_workbook_verification_verify_workbookpath",
+      "label": "workbookPath",
+      "degree": 1
+    },
+    {
+      "id": "tmp_workbook_verification_verify_outputdir",
+      "label": "outputDir",
+      "degree": 1
+    },
+    {
+      "id": "tmp_workbook_verification_verify_targetsheets",
+      "label": "targetSheets",
+      "degree": 1
+    },
+    {
+      "id": "tmp_workbook_verification_verify_checks",
+      "label": "checks",
+      "degree": 1
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `QAApp`, `fs`, `path` to the rest of the system?",
+      "why": "9 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}

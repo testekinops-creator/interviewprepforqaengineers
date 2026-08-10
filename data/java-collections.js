@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════════════════════
+   java-collections.js — Java Collections Framework
+   ═══════════════════════════════════════════════════════════════ */
+var defined_sections = defined_sections || {};
+
+defined_sections['java-collections'] = {
+  title: '🗄️ Java Collections',
+  description: 'Lists, Sets, Maps, and choosing the right data structure for test automation',
+  questions: [
+    {
+      id: 'JCOL001',
+      category: 'Java',
+      topic: 'Comparison',
+      subtopic: 'ArrayList vs LinkedList',
+      question: 'What is the difference between ArrayList and LinkedList? When would you use which?',
+      whyAsked: 'Fundamental data structure question. Tests if you understand memory and performance implications.',
+      difficulty: 2,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'ArrayList uses a dynamic array to store elements, making retrieving data (get) very fast O(1), but adding/removing data in the middle slow O(n). LinkedList uses a doubly-linked list, making adding/removing fast O(1) if you have the node, but retrieving data slow O(n) because it must traverse the list.',
+      interviewAnswer: 'In Java automation, I almost exclusively use **ArrayList**. ArrayList is backed by a dynamic array in memory. Because the memory is contiguous, retrieving an element by its index (`list.get(5)`) is incredibly fast — O(1) time complexity. However, if I need to insert or delete an element in the middle of an ArrayList, it is slow O(n) because Java has to shift all the subsequent elements over to make room or fill the gap.\n\n**LinkedList** is backed by nodes where each node points to the next and previous node. Retrieving an element is slow O(n) because you have to start at the beginning and traverse the links. But inserting or deleting is fast O(1) because you just change the pointers of the neighboring nodes.\n\nSince 99% of automation involves storing a list of WebElements or test data and then iterating through them or getting them by index, ArrayList is much more performant.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | `ArrayList` | `LinkedList` |\n| :--- | :--- | :--- |\n| **Underlying Data Structure**| Dynamic Array | Doubly-Linked List |\n| **Search / Get Operation** | Very Fast O(1) | Slow O(n) |\n| **Insert / Delete (Middle)**| Slow O(n) | Fast O(1) |\n| **Memory Overhead** | Low (just the array) | High (stores data + 2 pointers per node) |\n| **QA Use Case** | Storing `findElements` results | Implementing custom Queue/Stack logic |',
+      simpleExplanation: 'ArrayList is like a row of lockers; you can go straight to locker #5. LinkedList is a scavenger hunt; locker #1 gives you a clue to find locker #2, etc.',
+      realWorldExample: 'N/A',
+      projectExample: 'When returning multiple WebElements from `driver.findElements(By.tagName("a"))`, Selenium natively returns an ArrayList. I iterate through this ArrayList to verify all links are valid.',
+      codeCommand: 'List<String> arrList = new ArrayList<>();\narrList.add("Selenium"); // Fast\narrList.get(0);          // Very Fast\n\nList<String> linkList = new LinkedList<>();\nlinkList.add("Playwright");\nlinkList.get(0);         // Slow (must traverse)',
+      expectedOutput: 'N/A',
+      followUpQ: 'What happens when an ArrayList gets full?',
+      followUpA: 'When an ArrayList exceeds its capacity, it automatically creates a new array that is 50% larger (default capacity is 10, jumps to 15), copies all the old elements into the new array, and trashes the old one. This resizing operation is expensive, which is why it is best to provide an initial capacity if you know you are adding 1000 items: `new ArrayList<>(1000)`.',
+      seniorFollowUpQ: 'Is ArrayList thread-safe?',
+      seniorFollowUpA: 'No. If multiple threads try to add or remove elements from an ArrayList simultaneously, it can throw a `ConcurrentModificationException` or corrupt the data. If I need a thread-safe list in a parallel TestNG environment, I use `CopyOnWriteArrayList` or wrap it using `Collections.synchronizedList()`.',
+      commonMistake: 'Using LinkedList by default thinking it is always "better" for memory.',
+      bestPractice: 'Always default to ArrayList unless you have a specific architectural need for frequent middle insertions.'
+    },
+    {
+      id: 'JCOL002',
+      category: 'Java',
+      topic: 'Comparison',
+      subtopic: 'HashMap vs HashSet',
+      question: 'Explain the difference between a HashMap and a HashSet. How are they related?',
+      whyAsked: 'Tests understanding of hashing data structures.',
+      difficulty: 2,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'HashMap stores Key-Value pairs, where keys must be unique. HashSet stores single unique Objects. Internally, a HashSet actually uses a HashMap behind the scenes, storing your object as the key and a dummy object as the value.',
+      interviewAnswer: 'A **HashMap** is a collection that stores data in Key-Value pairs (e.g., `map.put("username", "admin")`). It does not allow duplicate keys. If you insert a value with an existing key, it overwrites the old value.\n\nA **HashSet** is a collection that stores a list of unique objects (e.g., `set.add("admin")`). It does not allow duplicates. If you try to add a duplicate, the `add()` method simply returns `false`.\n\nThe interesting architectural fact is that Java implements `HashSet` by using a `HashMap` internally. When you call `set.add("admin")`, Java actually calls `map.put("admin", PRESENT)` where `PRESENT` is a dummy constant object. \n\nIn automation, I use HashMap to pass test data (like JSON payloads or Excel rows) and HashSet to manage unique window handles (`driver.getWindowHandles()`).',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | `HashMap` | `HashSet` |\n| :--- | :--- | :--- |\n| **Stores** | Key-Value pairs | Single Objects |\n| **Duplicates** | No duplicate Keys allowed | No duplicate Objects allowed |\n| **Nulls** | Allows 1 null key, multiple null values | Allows 1 null object |\n| **Internal Structure**| Array of Nodes (Buckets) | Backed by a HashMap instance |\n| **QA Use Case** | Storing API headers, Config properties | Storing unique Window Handles, finding duplicate data |',
+      simpleExplanation: 'HashMap is a dictionary: you look up a word (key) to get the definition (value). HashSet is a guest list: it\'s just a list of names, and nobody can be on the list twice.',
+      realWorldExample: 'N/A',
+      projectExample: 'I used a HashMap to read our environment configurations: `configMap.get("QA_URL")`. I used a HashSet to verify a web table had no duplicate user IDs: I added all IDs to the Set and asserted the Set size matched the list size.',
+      codeCommand: '// HashMap\nMap<String, String> map = new HashMap<>();\nmap.put("Browser", "Chrome");\nSystem.out.println(map.get("Browser")); // Prints Chrome\n\n// HashSet\nSet<String> set = new HashSet<>();\nset.add("Window1");\nset.add("Window1"); // Returns false, ignored',
+      expectedOutput: 'N/A',
+      followUpQ: 'How does a HashMap handle collisions (two keys with the same hash code)?',
+      followUpA: 'When two different keys produce the same Hash Code, they map to the same bucket in the array. Before Java 8, they were stored as a LinkedList in that bucket. From Java 8 onwards, if the LinkedList grows beyond 8 elements, Java converts it into a Balanced Tree (Red-Black Tree) to improve search time from O(n) to O(log n).',
+      seniorFollowUpQ: 'How do you iterate over a HashMap efficiently?',
+      seniorFollowUpA: 'The most efficient way is using `entrySet()`. `for (Map.Entry<String, String> entry : map.entrySet()) { ... }`. Using `keySet()` and then calling `map.get(key)` inside the loop is inefficient because it requires two operations: getting the keys, then hashing each key again to find the value.',
+      commonMistake: 'Iterating using keySet() instead of entrySet().',
+      bestPractice: 'Use entrySet() for iteration. Define initial capacity for maps if the size is known to prevent expensive rehashing.'
+    },
+    {
+      id: 'JCOL003',
+      category: 'Java',
+      topic: 'Troubleshooting',
+      subtopic: 'Written Test - Iteration',
+      question: 'WRITTEN TEST: What happens when you run this code?\n`List<String> list = new ArrayList<>(Arrays.asList("A", "B", "C"));\nfor(String s : list) { if(s.equals("B")) { list.remove(s); } }`',
+      whyAsked: 'Classic core Java trap. Tests knowledge of fail-fast iterators.',
+      difficulty: 3,
+      importance: 'must',
+      interviewType: 'Written Test',
+      thirtySecAnswer: 'It will throw a `ConcurrentModificationException` at runtime. You cannot modify a collection structurally (add/remove) while iterating over it with a standard for-each loop.',
+      interviewAnswer: 'This code will throw a `ConcurrentModificationException`.\n\n**Why?**\nJava\'s enhanced `for` loop (for-each) implicitly uses an `Iterator` behind the scenes. The iterator maintains an internal counter called `modCount` which tracks structural modifications to the list. \n\nWhen you call `list.remove(s)` directly on the list, the list updates its modification count, but the Iterator doesn\'t know about it. On the very next loop iteration, the Iterator checks the count, sees it has changed unexpectedly, and immediately throws a `ConcurrentModificationException`. This is called "fail-fast" behavior to prevent unpredictable iteration over corrupted data structures.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Approach | Code | Result |\n| :--- | :--- | :--- |\n| **For-Each Loop (Direct Remove)** | `for(String s: list) { list.remove(s); }` | `ConcurrentModificationException` |\n| **Iterator (Safe Remove)** | `while(it.hasNext()) { if(...) it.remove(); }` | Safely removes element |\n| **Java 8 `removeIf`** | `list.removeIf(s -> s.equals("B"));` | Safely removes element (Cleanest) |',
+      simpleExplanation: 'You can\'t pull a brick out of the wall while you are currently climbing it. The iterator will panic and crash.',
+      realWorldExample: 'N/A',
+      projectExample: 'In my automation framework, I had an ArrayList of window handles. I wanted to close specific windows and remove them from the list. Using a for-each loop crashed the test. I fixed it by using an `Iterator` and calling `iterator.remove()`.',
+      codeCommand: '// THE FIX (Pre-Java 8):\nIterator<String> iterator = list.iterator();\nwhile (iterator.hasNext()) {\n    String s = iterator.next();\n    if (s.equals("B")) {\n        iterator.remove(); // Call remove ON THE ITERATOR, not the list\n    }\n}\n\n// THE FIX (Java 8+):\nlist.removeIf(s -> s.equals("B"));',
+      expectedOutput: 'ConcurrentModificationException',
+      followUpQ: 'Does a standard `for (int i=0; i<list.size(); i++)` loop throw this exception?',
+      followUpA: 'No, a standard `for(int i)` loop does not use an Iterator, so it won\'t throw the exception. However, it will cause a logic bug: when you remove index 1, index 2 shifts left to become index 1. The loop then increments `i` to 2, effectively skipping the element that shifted into index 1.',
+      seniorFollowUpQ: 'How do thread-safe collections handle this?',
+      seniorFollowUpA: 'A thread-safe collection like `ConcurrentHashMap` or `CopyOnWriteArrayList` uses "fail-safe" iterators instead of fail-fast. A `CopyOnWriteArrayList` creates a literal clone of the underlying array whenever a modification is made, so the iterator continues safely over the original, unmodified snapshot of the array.',
+      commonMistake: 'Trying to remove elements inside a for-each loop.',
+      bestPractice: 'Use Java 8 `removeIf()` for clean, safe removal based on a condition.'
+    }
+  ]
+};

@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════════════════════
+   test-design.js — Test Case Design Techniques
+   ═══════════════════════════════════════════════════════════════ */
+var defined_sections = defined_sections || {};
+
+defined_sections['test-design'] = {
+  title: '📐 Test Case Design',
+  description: 'Black-box testing techniques: BVA, EP, Decision Tables, and State Transition',
+  questions: [
+    {
+      id: 'TD001',
+      category: 'Test Design',
+      topic: 'Techniques',
+      subtopic: 'Equivalence Partitioning & BVA',
+      question: 'Explain Equivalence Partitioning (EP) and Boundary Value Analysis (BVA) with a combined example.',
+      whyAsked: 'The absolute foundation of test case design. Shows you know how to reduce test data without losing coverage.',
+      difficulty: 1,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'EP divides input data into valid and invalid partitions, testing one value from each. BVA tests the exact boundaries of those partitions because errors usually occur at the edges.',
+      interviewAnswer: 'EP and BVA are black-box testing techniques used together to maximize coverage with minimal test cases.\n\n**Equivalence Partitioning (EP)** groups inputs into valid and invalid classes. If one value in a class works, we assume all will work. \n**Boundary Value Analysis (BVA)** focuses on the edges of these partitions. Programmers often make `>` vs `>=` mistakes (off-by-one errors), so testing the exact boundaries is critical.\n\nFor example, if an age field accepts `18 to 60`:\n* **EP Partitions:** Invalid Low (`<18`), Valid (`18-60`), Invalid High (`>60`). We pick one from each: `10`, `30`, `70`.\n* **BVA Values:** We test the edges. `17`, `18`, `19` and `59`, `60`, `61`.\n\nBy combining them, I only need about 7 test cases instead of testing all 100 possible ages.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | Equivalence Partitioning (EP) | Boundary Value Analysis (BVA) |\n| :--- | :--- | :--- |\n| **Focus** | Center of the data group | Edges of the data group |\n| **Best For** | Reducing total number of test cases | Catching off-by-one coding errors |\n| **Rule** | Pick 1 representative value per partition | Pick Exact Edge, Edge-1, Edge+1 |\n| **Example (1-10)**| Test: 5, -5, 15 | Test: 0, 1, 2, and 9, 10, 11 |',
+      simpleExplanation: 'EP is saying "Any teenager will do for this test." BVA is saying "Let\'s test the kid who turned 13 exactly today, and the guy who turns 20 tomorrow." ',
+      realWorldExample: 'N/A',
+      projectExample: 'In an e-commerce checkout, the free shipping threshold was $50. I used BVA to test a cart of $49.99, $50.00, and $50.01. The $50.00 cart incorrectly charged shipping because the dev used `> 50` instead of `>= 50`.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'How do you apply EP to a non-numeric field, like a Dropdown?',
+      followUpA: 'EP works for categories too. For a "Country" dropdown, partitions could be: Valid Country (e.g., USA), Valid Country with special rules (e.g., Canada requires province), and Invalid (Empty selection). BVA doesn\'t really apply to dropdowns unless the list is massive and paginated.',
+      seniorFollowUpQ: 'Are EP and BVA sufficient to guarantee 100% test coverage?',
+      seniorFollowUpA: 'No. They only test single-input fields in isolation. They will not catch defects caused by the *combination* of multiple fields, nor will they catch state-dependent bugs. For complete coverage, you must combine them with Decision Tables or State Transition testing.',
+      commonMistake: 'Only doing valid partitions and forgetting the invalid/negative partitions.',
+      bestPractice: 'Always test the invalid partitions (Negative Testing). That is where the system is most likely to crash.'
+    },
+    {
+      id: 'TD002',
+      category: 'Test Design',
+      topic: 'Techniques',
+      subtopic: 'Decision Table Testing',
+      question: 'When would you use a Decision Table instead of EP or BVA?',
+      whyAsked: 'Tests if you know how to handle complex business rules and combinations of inputs.',
+      difficulty: 2,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'I use Decision Tables when the system behavior depends on the combination of multiple inputs (e.g., if User is VIP AND Cart > $100 THEN Free Shipping). EP/BVA only test one input at a time.',
+      interviewAnswer: 'Equivalence Partitioning is great for single fields, but it fails when inputs interact with each other. I use **Decision Table Testing** (also called Cause-Effect Graphing) for complex business logic.\n\nA Decision Table maps out all possible combinations of conditions (Inputs) and their corresponding actions (Outputs). \n\nFor example, calculating a discount:\n- Condition 1: New Customer? (Y/N)\n- Condition 2: Coupon Code Valid? (Y/N)\n- Action: 20% off, 10% off, or 0% off.\n\nWith 2 boolean conditions, there are 4 combinations (2^n). I map all 4 columns to ensure the requirements haven\'t missed an edge case.',
+      detailedExplanation: 'Decision tables are essentially Truth Tables. They are incredibly useful for identifying missing requirements. Often, when building the table, you realize the Product Owner never specified what happens if Condition 1 is True but Condition 2 is False.',
+      simpleExplanation: 'It\'s a grid. Top half lists all the "If this happens" combinations. Bottom half lists all the "Then do this" results.',
+      realWorldExample: 'N/A',
+      projectExample: 'Testing a financial loan approval system. The approval depended on Credit Score, Income, and Existing Debt. Using a Decision Table, I mapped out 8 rules and discovered a logical flaw in the requirements where a specific combination of inputs had no defined outcome.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'How do you handle a Decision Table with 10 conditions (1024 combinations)?',
+      followUpA: 'Testing 1024 combinations manually is impossible. I would use Orthogonal Arrays or Pairwise Testing (using tools like PICT) to reduce the combinations to a manageable number while still guaranteeing that every pair of parameters is tested together.',
+      seniorFollowUpQ: 'What is Pairwise (All-Pairs) Testing?',
+      seniorFollowUpA: 'It\'s a combinatorial testing method based on the statistical observation that most defects are caused by interactions of at most two factors. Instead of testing all possible combinations (exhaustively), Pairwise ensures every possible pair of inputs is tested at least once, drastically reducing test cases (e.g., from 1000 down to 40) with minimal loss in coverage.',
+      commonMistake: 'Trying to use Decision Tables for simple, unrelated input fields.',
+      bestPractice: 'Use Decision Tables to cross-check Business Requirements Documents (BRD) for missing logic before coding even starts.'
+    },
+    {
+      id: 'TD003',
+      category: 'Test Design',
+      topic: 'Techniques',
+      subtopic: 'Written Test - Error Guessing',
+      question: 'WRITTEN TEST: What is Error Guessing and how does it differ from Exploratory Testing?',
+      whyAsked: 'Distinguishes between formal techniques and experience-based testing.',
+      difficulty: 2,
+      importance: 'important',
+      interviewType: 'Written Test',
+      thirtySecAnswer: 'Error Guessing is an experience-based technique where a tester uses their intuition and past experience to guess where bugs might exist (e.g., dividing by zero). Exploratory Testing is a simultaneous learning, test design, and execution process without pre-written test cases.',
+      interviewAnswer: 'Both are experience-based techniques, but they differ in structure:\n\n**Error Guessing** is a test design technique. Based on my past experience as an SDET, I deliberately design test cases for common developer pitfalls before I even touch the app. For example: entering null values, dividing by zero, passing negative numbers to a date field, or uploading a 5GB file.\n\n**Exploratory Testing** is a test execution technique. It is unscripted. I learn the application as I interact with it, and my next test is determined by the result of my previous action. It relies on curiosity and domain knowledge rather than pre-planned "guesses".',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | Error Guessing | Exploratory Testing |\n| :--- | :--- | :--- |\n| **Phase** | Test Design (Pre-execution) | Test Execution (Real-time) |\n| **Based On** | Past experience with common coding errors | Real-time observation and application behavior |\n| **Documentation**| Can be documented as formal test cases | Usually documented via session charters or mind maps |\n| **Example** | "Devs always mess up Leap Years. I\'ll write a test for Feb 29." | "This button looks weird, let me click it rapidly 10 times." |',
+      simpleExplanation: 'Error Guessing is knowing the usual traps (like checking for nulls). Exploratory testing is wandering through the app like a detective looking for clues.',
+      realWorldExample: 'N/A',
+      projectExample: 'While reviewing a new API endpoint, I used Error Guessing to inject SQL injection strings (`\' OR 1=1;--`) and special Unicode emojis into the payload. The system crashed. No formal requirement told me to test this; it came from experience.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'What is State Transition Testing?',
+      followUpA: 'It\'s used when the system behaves differently depending on its current state. For example, an ATM machine: The "Withdraw" action works in the "Authenticated" state, but fails in the "Locked" state. You draw a state machine diagram to ensure all valid and invalid transitions are covered.',
+      seniorFollowUpQ: 'How do you measure the coverage of Exploratory Testing?',
+      seniorFollowUpA: 'Exploratory testing coverage cannot be measured using standard traceability matrices. Instead, I use Session-Based Test Management (SBTM). We run time-boxed sessions (charters) focused on specific components, and measure coverage based on the charter goals achieved and the severity of bugs found per session.',
+      commonMistake: 'Relying entirely on Error Guessing and skipping formal EP/BVA testing.',
+      bestPractice: 'Always use formal techniques (EP, BVA, Decision Tables) for baseline coverage, and use Error Guessing/Exploratory to find the edge cases.'
+    }
+  ]
+};

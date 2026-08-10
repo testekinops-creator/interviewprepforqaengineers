@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════════════════════
+   defect-mgmt.js — Defect Management
+   ═══════════════════════════════════════════════════════════════ */
+var defined_sections = defined_sections || {};
+
+defined_sections['defect-mgmt'] = {
+  title: '🐛 Defect Management',
+  description: 'Bug Life Cycle, Severity vs Priority, Defect Triage, and effective Bug Reporting',
+  questions: [
+    {
+      id: 'DM001',
+      category: 'Manual Testing',
+      topic: 'Defects',
+      subtopic: 'Defect Life Cycle',
+      question: 'Explain the stages of the Defect Life Cycle.',
+      whyAsked: 'Fundamental QA process knowledge to ensure you know how to track bugs from discovery to closure.',
+      difficulty: 1,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'The defect life cycle includes: New, Assigned, Open (In Progress), Fixed, Pending Retest, Retest, Verified (Closed), or Reopened if the fix failed.',
+      interviewAnswer: 'The Defect Life Cycle is the journey a bug takes from the moment it is logged until it is resolved. While Jira workflows can be customized, a standard lifecycle goes like this:\n\n1. **New:** I find a bug and log it.\n2. **Assigned:** The dev lead assigns it to a developer.\n3. **Open:** The developer starts working on it.\n4. **Fixed:** The developer finishes the code change and updates the status.\n5. **Pending Retest:** The code is deployed to the QA environment, waiting for me to test it.\n6. **Retest:** I execute the steps to reproduce the bug.\n7. **Verified / Closed:** If the bug is gone, I close it.\n8. **Reopen:** If the bug still exists, I reopen it, and it goes back to Assigned/Open.\n\nThere are also edge cases like **Deferred** (fix later), **Duplicate** (already logged), or **Rejected** (not a bug).',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| State | Who Owns It | Action |\n| :--- | :--- | :--- |\n| **New** | QA | Bug is logged into the tracking system |\n| **Assigned** | Dev Lead | Assigned to a specific developer |\n| **Fixed** | Developer | Code changes made, deployed to QA |\n| **Retest** | QA | QA verifies the fix in the test environment |\n| **Closed/Reopen**| QA | Final decision based on retest results |',
+      simpleExplanation: 'It\'s like returning a broken item to a store. You report it (New), the manager gives it to a repairman (Assigned), they fix it (Fixed), you test it to make sure it works (Retest), and then you either keep it (Closed) or give it back because it\'s still broken (Reopened).',
+      realWorldExample: 'N/A',
+      projectExample: 'In my last project, developers often marked tickets "Fixed" but forgot to deploy the code to the QA environment. I instituted a new status called "Ready for QA" (Pending Retest) that triggered automatically only after the Jenkins deployment pipeline succeeded.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'What happens if a developer rejects your bug saying "It works on my machine"?',
+      followUpA: 'I never argue. I walk over to their desk (or get on a Zoom call) and ask them to show me. Usually, the discrepancy is caused by environment differences (they are testing against a local database, I am testing against QA), different caching, or missing configuration files. We debug the environment difference together and update the bug ticket with our findings.',
+      seniorFollowUpQ: 'How do you handle a situation where a bug cannot be reproduced consistently (flaky bug)?',
+      seniorFollowUpA: 'I log the bug but clearly mark it as "Intermittent". I include everything I can: logs, exact timestamps, OS/Browser versions, and network HAR files. Then, I pair-program with a developer to look at the backend logs at that exact timestamp to see if there was a race condition or database lock.',
+      commonMistake: 'Closing a bug without actually retesting it in the correct environment.',
+      bestPractice: 'Always attach logs, screenshots, network payloads, and exact reproduction steps when moving a bug to "New".'
+    },
+    {
+      id: 'DM002',
+      category: 'Manual Testing',
+      topic: 'Defects',
+      subtopic: 'Severity vs Priority',
+      question: 'What is the difference between Severity and Priority? Give examples.',
+      whyAsked: 'Tests if you understand the business impact of bugs versus the technical impact.',
+      difficulty: 1,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'Severity is the technical impact of a bug on the system (how badly it breaks). Priority is the business impact (how quickly it needs to be fixed). QA assigns Severity; Product Owners assign Priority.',
+      interviewAnswer: 'Severity and Priority are two different lenses used to evaluate a bug.\n\n**Severity** is determined by the QA engineer. It measures the technical impact on the application. For example, if a core feature crashes the app, that is a High Severity bug. If a font color is wrong, that is a Low Severity bug.\n\n**Priority** is determined by the Product Owner or Business Analyst. It dictates the order in which developers should fix bugs based on business needs. \n\nIt is entirely possible to have a Low Severity bug that has a High Priority, and vice versa. As an SDET, I accurately report the Severity and provide context so the business can make the right Priority decision.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | Severity | Priority |\n| :--- | :--- | :--- |\n| **Definition** | Degree of impact on system functionality | Order in which the defect should be resolved |\n| **Determined By**| QA Engineer / Tester | Product Owner / Business / Project Manager |\n| **Focus** | Technical Impact | Business Impact |\n| **Categories** | Critical, Major, Minor, Trivial | P1, P2, P3, P4 (or High, Medium, Low) |',
+      simpleExplanation: 'Severity is "How badly is the car broken?" Priority is "How quickly do we need to fix the car?"',
+      realWorldExample: 'High Severity / Low Priority: The app crashes 100% of the time, but only on an obsolete browser (IE8) that 0.01% of customers use.\nLow Severity / High Priority: The company logo on the homepage is misspelled. It doesn\'t break the app (Low Severity), but it\'s highly embarrassing to the brand (High Priority).',
+      projectExample: 'In my e-commerce project, the "Add to Cart" button threw a 500 error on the staging environment. This was High Severity (blocks core flow) and High Priority (needs immediate hotfix).',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'Can a QA change the Priority of a bug?',
+      followUpA: 'Generally, no. QA can recommend a priority based on user impact, but the final decision on Priority belongs to the Product Owner, as it involves budget, sprint capacity, and business goals.',
+      seniorFollowUpQ: 'How do you handle Defect Triage meetings?',
+      seniorFollowUpA: 'In a triage meeting, I represent the QA perspective. I present the newly logged bugs, clearly state the Steps to Reproduce, Severity, and the affected customer base. I work with the Dev Lead (who estimates the fix effort) and the Product Owner (who assesses business impact) to assign a final Priority and sprint target for the bug.',
+      commonMistake: 'Marking every bug you find as "High Priority".',
+      bestPractice: 'Log defects objectively. Focus on accurate Severity and let the business decide Priority.'
+    },
+    {
+      id: 'DM003',
+      category: 'Manual Testing',
+      topic: 'Defects',
+      subtopic: 'Bug Report Writing',
+      question: 'WRITTEN TEST: What are the essential components of a good bug report?',
+      whyAsked: 'Assesses your ability to communicate effectively with developers.',
+      difficulty: 1,
+      importance: 'must',
+      interviewType: 'Written Test',
+      thirtySecAnswer: 'A good bug report needs a clear Title, Description, exact Steps to Reproduce, Expected vs Actual Results, Environment details, and evidence (screenshots/logs).',
+      interviewAnswer: 'A bug report is useless if a developer cannot reproduce the issue. A high-quality bug report must include:\n\n1. **Clear Title:** Summarize the issue (e.g., "500 Error on Checkout when using Amex").\n2. **Environment:** OS, Browser, App Version, and Environment (QA, Staging).\n3. **Steps to Reproduce:** Exact, numbered steps. (e.g., 1. Go to homepage, 2. Click Login...)\n4. **Expected Result:** What the system *should* do according to requirements.\n5. **Actual Result:** What the system *actually* did.\n6. **Evidence:** Screenshots, Video recordings, Console errors, or API HAR files.\n\nAs a Senior QA, I also include the specific API payload that failed and database state if relevant, which cuts debugging time in half for developers.',
+      detailedExplanation: 'Developers spend 50% of their debugging time just trying to recreate the issue. Providing exact test data (e.g., specific user credentials) is critical.',
+      simpleExplanation: 'Tell them exactly what you did, what broke, what was supposed to happen, and prove it with a picture.',
+      realWorldExample: 'N/A',
+      projectExample: 'I created a standard Jira Bug Template for our team. Before this, testers were logging bugs like "Login broken". The template forced everyone to fill in Expected vs Actual, which eliminated 90% of the "Needs More Info" ping-pong with developers.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'What do you do if you find a bug but there are no specific requirements for that feature?',
+      followUpA: 'I log the bug anyway, but label it as an "Enhancement" or "UX Issue", and I reference general industry standards or competitor analysis as the "Expected Result". I then discuss it with the Product Owner for a final decision.',
+      seniorFollowUpQ: 'How do you measure the quality of a QA team\'s bug reports?',
+      seniorFollowUpA: 'I track the "Bug Bounce Rate" — the percentage of bugs rejected by developers for reasons like "Cannot Reproduce" or "Working as Designed". A high bounce rate means the QA team needs training on writing better steps, verifying requirements, or isolating environment issues.',
+      commonMistake: 'Writing vague titles like "App crashed".',
+      bestPractice: 'Use the "Given, When, Then" format even for manual bug reports to ensure clarity.'
+    }
+  ]
+};

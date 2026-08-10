@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════════════════════
+   selenium-waits.js — Synchronization in Selenium
+   ═══════════════════════════════════════════════════════════════ */
+var defined_sections = defined_sections || {};
+
+defined_sections['sel-waits'] = {
+  title: '⏱️ Selenium Waits',
+  description: 'Synchronization strategies, Implicit, Explicit, Fluent Waits, and Thread.sleep',
+  questions: [
+    {
+      id: 'SW001',
+      category: 'Selenium',
+      topic: 'Waits',
+      subtopic: 'Implicit vs Explicit',
+      question: 'What is the difference between Implicit Wait and Explicit Wait?',
+      whyAsked: 'The most fundamental synchronization question. Tests if you know how to handle flaky tests correctly.',
+      difficulty: 2,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'Implicit wait is applied globally to the WebDriver instance for the lifetime of the session. It polls the DOM when trying to find any element. Explicit wait is applied to a specific element for a specific condition (like visibility or clickability) before throwing a timeout exception.',
+      interviewAnswer: 'In my automation framework, I primarily use Explicit Waits. \n\nImplicit Wait (`driver.manage().timeouts().implicitlyWait()`) tells the WebDriver to poll the DOM for a certain amount of time when trying to find an element or elements if they are not immediately available. It is set once and applies to all `findElement` calls.\n\nExplicit Wait (`WebDriverWait`) tells the execution to wait for a specific condition (e.g., `visibilityOfElementLocated`, `elementToBeClickable`) on a specific element before proceeding. It is highly targeted.\n\nIf you mix them, you can encounter unpredictable timeouts because the driver might apply both waits, causing tests to hang much longer than expected. The best practice is to set Implicit Wait to 0 (or not set it at all) and exclusively use Explicit Waits wrapped in a utility class.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | Implicit Wait | Explicit Wait |\n| :--- | :--- | :--- |\n| **Scope** | Global (applies to all elements) | Local (applies to a specific element) |\n| **Condition** | Only checks for presence in the DOM | Checks specific conditions (visible, clickable, etc.) |\n| **Performance** | Can slow down negative tests (waiting for element to NOT be there) | Highly efficient, proceeds immediately when condition is met |\n| **Exception** | `NoSuchElementException` | `TimeoutException` |\n| **Usage** | Set once during Driver setup | Used dynamically before interacting with elements |',
+      simpleExplanation: 'Implicit wait is like telling a waiter "Whenever I ask for any dish, if it\'s not ready, wait up to 10 minutes before telling me you don\'t have it." Explicit wait is saying "For this specific steak, wait until it is cooked medium-rare before bringing it to me."',
+      realWorldExample: 'A loading spinner disappears, but the button behind it is still not clickable for 500ms because of an animation. Implicit wait won\'t help because the button is already in the DOM. Explicit wait (`elementToBeClickable`) solves this.',
+      projectExample: 'In my current project, we disabled implicit waits entirely. I created a `WaitUtils` class with methods like `waitForElementVisible(By locator, int timeout)` which uses `WebDriverWait` internally. This reduced our test flakiness by 40%.',
+      codeCommand: '// Implicit Wait (Not Recommended to mix)\ndriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));\n\n// Explicit Wait (Recommended)\nWebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));\nWebElement button = wait.until(ExpectedConditions.elementToBeClickable(By.id("submit")));',
+      expectedOutput: 'Element is found or TimeoutException is thrown after 10 seconds.',
+      followUpQ: 'What happens if you use both Implicit and Explicit waits together?',
+      followUpA: 'Mixing them causes unpredictable behavior. The timeouts can stack or interfere. For example, if implicit is 10s and explicit is 15s, the total wait time might be 25s, or it might throw an exception after 10s depending on the browser driver implementation. Selenium officially recommends never mixing them.',
+      seniorFollowUpQ: 'How do you wait for a background JavaScript/Ajax call to finish before interacting with an element?',
+      seniorFollowUpA: 'I use a custom Explicit Wait that executes JavaScript. `wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));`. For Ajax (jQuery), I wait for `jQuery.active == 0`. For React/Angular, it is trickier; I often wait for the loading spinner locator to become `invisibilityOfElementLocated`.',
+      commonMistake: 'Using Thread.sleep() instead of dynamic waits.',
+      bestPractice: 'Always use Explicit Waits. Wrap them in a helper/utility class to keep test code clean.'
+    },
+    {
+      id: 'SW002',
+      category: 'Selenium',
+      topic: 'Waits',
+      subtopic: 'Fluent Wait',
+      question: 'What is Fluent Wait and when would you use it over Explicit Wait?',
+      whyAsked: 'Shows advanced understanding of synchronization mechanisms.',
+      difficulty: 3,
+      importance: 'important',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'Fluent Wait is a type of explicit wait where you can define the polling frequency (how often it checks) and specify exceptions to ignore (like NoSuchElementException) while waiting.',
+      interviewAnswer: 'Fluent Wait gives you maximum control over the wait behavior. While standard Explicit Wait polls every 500ms by default, Fluent Wait allows you to customize the polling interval and explicitly ignore specific exceptions during the wait period.\n\nI use Fluent Wait when interacting with highly dynamic elements that might momentarily disappear and reappear, or when dealing with slow backend processes. For example, if an element throws a `StaleElementReferenceException` repeatedly while a table is rendering, I can configure a Fluent Wait to ignore that specific exception and keep polling every 2 seconds until the maximum timeout is reached.',
+      detailedExplanation: '`WebDriverWait` actually extends `FluentWait`. So Explicit Wait is just a pre-configured Fluent Wait with a default polling time of 500ms and automatically ignoring `NotFoundException`.',
+      simpleExplanation: 'Fluent wait is like calling customer service. You set the max time you are willing to wait (30 mins), how often you say "hello?" (every 2 mins), and you agree to ignore the hold music (exceptions) until a real person answers.',
+      realWorldExample: 'Waiting for an asynchronous report generation. You click "Generate", and you have to wait for a "Download" button. It might take 2 minutes. You use a Fluent Wait with a 2-minute max timeout, polling every 5 seconds, ignoring NoSuchElementException.',
+      projectExample: 'In our Salesforce testing, the DOM is very dynamic. Elements frequently go stale during page loads. I built a custom `fluentWait` utility that polls every 1 second and ignores `StaleElementReferenceException` to ensure robust interactions.',
+      codeCommand: 'Wait<WebDriver> wait = new FluentWait<WebDriver>(driver)\n    .withTimeout(Duration.ofSeconds(30))\n    .pollingEvery(Duration.ofSeconds(2))\n    .ignoring(NoSuchElementException.class)\n    .ignoring(StaleElementReferenceException.class);\n\nWebElement foo = wait.until(new Function<WebDriver, WebElement>() {\n  public WebElement apply(WebDriver driver) {\n    return driver.findElement(By.id("foo"));\n  }\n});',
+      expectedOutput: 'Element is found robustly despite temporary DOM instability.',
+      followUpQ: 'Can you write a custom ExpectedCondition for a Fluent Wait?',
+      followUpA: 'Yes, by creating a class that implements `ExpectedCondition<T>` or using a lambda expression. For example: `wait.until(driver -> driver.findElements(By.cssSelector(".row")).size() > 5);` waits until a list has more than 5 items.',
+      seniorFollowUpQ: 'How do you handle global timeouts in a large framework without hardcoding wait times everywhere?',
+      seniorFollowUpA: 'In my framework, all timeout values (SHORT_WAIT=5, MEDIUM_WAIT=15, LONG_WAIT=60) are read from a `config.properties` file or environment variables. This allows us to scale timeouts globally without touching code, which is crucial when running tests on slower CI/CD agents compared to fast local machines.',
+      commonMistake: 'Using a very aggressive polling time (e.g., 50ms) which overloads the WebDriver and slows down execution.',
+      bestPractice: 'Use a reasonable polling frequency (1-2 seconds) for long operations to conserve CPU and network calls to the browser.'
+    },
+    {
+      id: 'SW003',
+      category: 'Selenium',
+      topic: 'Waits',
+      subtopic: 'Written Test - Sleeps',
+      question: 'WRITTEN TEST: Why is `Thread.sleep()` considered an anti-pattern in automation?',
+      whyAsked: 'Screening question to immediately reject candidates with bad coding practices.',
+      difficulty: 1,
+      importance: 'must',
+      interviewType: 'Written Test',
+      thirtySecAnswer: 'Thread.sleep() causes a hard, unconditional pause in the thread execution. It guarantees the test will be slow, and does not guarantee the element will be ready, leading to flaky tests.',
+      interviewAnswer: '`Thread.sleep(5000)` pauses the Java thread unconditionally for exactly 5 seconds. \n\nWhy it is an anti-pattern:\n1) **It wastes time**: If the element appears in 1 second, the test still waits the full 5 seconds. Multiply this by hundreds of tests, and your suite execution time blows up.\n2) **It causes flakiness**: If the element takes 6 seconds to appear due to network lag, the test will fail because the sleep was only for 5 seconds.\n\nDynamic waits (Explicit/Fluent) resolve both issues by waiting *only as long as necessary*, up to a maximum threshold. The only time I ever use `Thread.sleep()` is during local debugging, never in committed framework code.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | Thread.sleep(10000) | WebDriverWait(10) |\n| :--- | :--- | :--- |\n| **Mechanism** | Pauses the JVM thread | Polls the DOM via WebDriver |\n| **Element ready in 2s** | Waits 10s (Wastes 8s) | Proceeds immediately after 2s |\n| **Element ready in 12s**| Fails (Waited too little)| Throws TimeoutException |\n| **Best used for** | Debugging only | All synchronization needs |',
+      simpleExplanation: 'Thread.sleep is a dumb wait. Explicit wait is a smart wait.',
+      realWorldExample: 'N/A',
+      projectExample: 'When I joined my current project, the suite took 4 hours. I replaced 200 instances of `Thread.sleep()` with `WebDriverWait`. The suite execution dropped to 1.5 hours and stability increased by 20%.',
+      codeCommand: '// BAD\nThread.sleep(5000);\ndriver.findElement(By.id("btn")).click();\n\n// GOOD\nnew WebDriverWait(driver, Duration.ofSeconds(10))\n    .until(ExpectedConditions.elementToBeClickable(By.id("btn")))\n    .click();',
+      expectedOutput: 'N/A',
+      followUpQ: 'Are there ANY legitimate use cases for Thread.sleep() in a framework?',
+      followUpA: 'Practically none for standard web interactions. The only extremely rare edge case is waiting for a third-party asynchronous system where you have absolutely no way to poll for a status (e.g., waiting for an email to arrive in a slow external inbox before querying the API). Even then, polling the API is better.',
+      seniorFollowUpQ: 'How do you detect and prevent Thread.sleep from being committed to the repo?',
+      seniorFollowUpA: 'I configure a SonarQube rule or a Checkstyle/PMD rule in the Maven `pom.xml` that fails the build if `Thread.sleep` is detected in the `src/test/java` directory. This enforces the standard at the CI level.',
+      commonMistake: 'Adding a Thread.sleep() "just to be safe" before a flaky click.',
+      bestPractice: 'Completely ban Thread.sleep from your automation repository.'
+    }
+  ]
+};

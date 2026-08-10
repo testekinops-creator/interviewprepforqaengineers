@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════════════════════
+   playwright.js — Playwright Fundamentals
+   ═══════════════════════════════════════════════════════════════ */
+var defined_sections = defined_sections || {};
+
+defined_sections['pw-fundamentals'] = {
+  title: '🎬 Playwright Fundamentals',
+  description: 'Architecture, core concepts, setup, and differences from Selenium/Cypress',
+  questions: [
+    {
+      id: 'PW001',
+      category: 'Playwright',
+      topic: 'Basics',
+      subtopic: 'Architecture',
+      question: 'What is Playwright and how does its architecture differ from Selenium?',
+      whyAsked: 'Core understanding of the tool and why it is chosen over alternatives.',
+      difficulty: 3,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'Playwright is a Node.js-based tool for E2E testing. Unlike Selenium, which uses the WebDriver protocol (HTTP), Playwright communicates directly with the browser using WebSockets (CDP protocol). This makes it faster and less flaky.',
+      interviewAnswer: 'Playwright is a modern E2E testing framework by Microsoft. The key architectural difference from Selenium is how it communicates with the browser. Selenium uses the WebDriver protocol, sending HTTP requests for every command, which adds overhead and latency. Playwright uses a single WebSocket connection (via Chrome DevTools Protocol or CDP) to communicate bidirectionally with the browser. This means: 1) **Speed**: Commands are executed instantly without HTTP overhead. 2) **Bidirectional communication**: Playwright can listen to browser events (like network requests, console logs) in real-time, whereas Selenium has to poll for them. 3) **Out-of-process execution**: Test scripts run in Node.js, isolated from the browser, making it highly stable. It natively supports Chromium, WebKit, and Firefox.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | Selenium WebDriver | Playwright |\n| :--- | :--- | :--- |\n| **Protocol** | HTTP (JSON Wire / W3C) | WebSockets (CDP) |\n| **Communication** | Unidirectional (Polling) | Bidirectional (Event-driven) |\n| **Speed** | Slower (HTTP overhead) | Extremely fast |\n| **Waiting** | Manual (Explicit Waits) | Built-in Auto-waiting |\n| **Network Control**| Difficult (Requires proxies/Selenium 4 CDP) | Native (Intercept, mock, block traffic easily) |\n| **Context Isolation**| Slow (Launch new browser) | Fast (Launch new BrowserContext) |',
+      simpleExplanation: 'Selenium is like sending a letter for every instruction and waiting for a reply. Playwright is like being on a live phone call where you can talk and listen at the same time.',
+      realWorldExample: 'Because of WebSockets, you can intercept network requests on the fly: `page.route(\'**/*\', route => { ... })`. Doing this in Selenium 3 was nearly impossible, and in Selenium 4 it\'s still more complex.',
+      projectExample: 'We migrated a 500-test suite from Selenium to Playwright. Execution time dropped from 45 mins to 12 mins, mainly due to the WebSocket architecture and built-in auto-waiting.',
+      codeCommand: '// Playwright Basic Setup (Node.js/JS)\nconst { chromium } = require(\'playwright\');\n\n(async () => {\n  const browser = await chromium.launch({ headless: false });\n  const context = await browser.newContext();\n  const page = await context.newPage();\n  \n  await page.goto(\'https://example.com\');\n  console.log(await page.title());\n  \n  await browser.close();\n})();',
+      expectedOutput: 'Browser launches rapidly, logs title, closes.',
+      followUpQ: 'What is a BrowserContext in Playwright?',
+      followUpA: 'A BrowserContext is an isolated incognito-like session within a browser instance. It\'s fast and cheap to create. Instead of launching a new browser for every test (which is slow), Playwright launches one browser and creates a new BrowserContext for each test. This provides complete isolation (cookies, local storage) with very low overhead. You can even have multiple contexts in one test to simulate multi-user scenarios.',
+      seniorFollowUpQ: 'How does Playwright execute tests across Chromium, WebKit, and Firefox if it uses CDP (Chrome DevTools Protocol)?',
+      seniorFollowUpA: 'Playwright heavily patched Firefox and WebKit binaries to speak a protocol similar to CDP over WebSockets. So it doesn\'t just use standard browser installations; it downloads its own specifically patched browser binaries to ensure cross-browser WebSocket communication works identically.',
+      commonMistake: 'Thinking Playwright uses WebDriver. It does not.',
+      bestPractice: 'Leverage BrowserContexts for isolation instead of launching new browser instances.'
+    },
+    {
+      id: 'PW002',
+      category: 'Playwright',
+      topic: 'Comparison',
+      subtopic: 'Playwright vs Cypress',
+      question: 'WRITTEN TEST: What are the primary differences between Playwright and Cypress?',
+      whyAsked: 'Both are modern JS frameworks. Evaluates if you know which tool to pick for a project.',
+      difficulty: 3,
+      importance: 'must',
+      interviewType: 'Written Test',
+      thirtySecAnswer: 'Cypress runs inside the browser context, which restricts it to one tab and makes cross-domain testing hard. Playwright runs out-of-process via WebSockets, allowing multiple tabs, frames, and true cross-domain testing natively.',
+      interviewAnswer: 'Both are excellent tools, but Playwright offers more flexibility for complex enterprise applications. \n\nCypress runs **inside** the browser loop. This gives it native access to DOM and application variables, making it very developer-friendly. However, it means Cypress is fundamentally limited: it struggles with multiple tabs, multiple domains, and iframes because of browser security policies.\n\nPlaywright runs **out-of-process** communicating via WebSockets. It acts as an external controller. Therefore, handling multiple tabs, navigating across completely different domains (like SSO logins), and testing complex iframes is native and effortless in Playwright.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | Playwright | Cypress |\n| :--- | :--- | :--- |\n| **Architecture** | Out-of-process (WebSocket/CDP) | In-process (Executes inside browser) |\n| **Multiple Tabs** | Natively Supported | Not supported (workarounds needed) |\n| **Multiple Domains**| Natively Supported | Limited/Complex to setup |\n| **Language Support**| JS/TS, Python, Java, C# | JS/TS only |\n| **Iframes** | Native (`frameLocator`) | Clunky plugin required |\n| **Target Audience** | QA Engineers & Developers | Frontend Developers |',
+      simpleExplanation: 'Cypress is like a mechanic sitting inside the car while you drive. Playwright is like driving a remote-controlled car from the outside.',
+      realWorldExample: 'Testing an SSO Flow: User clicks Login -> Redirected to Okta (domain 2) -> Enters credentials -> Redirected back to App (domain 1). Playwright handles this seamlessly. Cypress historically struggled with this cross-origin jump.',
+      projectExample: 'I evaluated both for our new project. We chose Playwright because our B2B app heavily relies on multi-tab reports (clicking a link opens a PDF in a new tab) and third-party payment iframes, which were painful to automate in Cypress.',
+      codeCommand: '// Playwright handling multiple tabs easily\nconst [newPage] = await Promise.all([\n  context.waitForEvent(\'page\'),\n  page.click(\'a[target="_blank"]\') // Opens new tab\n]);\nawait newPage.waitForLoadState();\nconsole.log(await newPage.title());',
+      expectedOutput: 'Script successfully interacts with a completely new browser tab.',
+      followUpQ: 'Why might a developer prefer Cypress over Playwright?',
+      followUpA: 'Because Cypress runs inside the browser, developers can pause the test and directly inspect the application\'s Redux store, LocalStorage, or window objects directly from the Cypress UI runner. Cypress also has a longer history of Component Testing support, though Playwright has caught up recently.',
+      seniorFollowUpQ: 'How does Playwright handle cross-browser testing compared to Cypress?',
+      seniorFollowUpA: 'Playwright uses custom-built binaries of Chromium, WebKit, and Firefox, guaranteeing consistent execution across platforms (even running Safari/WebKit tests on Windows). Cypress uses the browsers installed on the host machine, which means you cannot run Safari tests natively on a Windows CI machine using Cypress.',
+      commonMistake: 'Trying to use Cypress for heavy backend/API automation or multi-tab scenarios.',
+      bestPractice: 'Use Playwright for enterprise E2E and multi-domain testing. Cypress is excellent for tight frontend component testing.'
+    },
+    {
+      id: 'PW003',
+      category: 'Playwright',
+      topic: 'Features',
+      subtopic: 'Auto-waiting',
+      question: 'How does Playwright handle waits compared to Selenium?',
+      whyAsked: 'Waits are the biggest source of flakiness; understanding auto-wait is crucial.',
+      difficulty: 2,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'Playwright has built-in auto-waiting. Before performing an action (like click), it automatically waits for the element to be visible, enabled, stable, and ready to receive events. This eliminates the need for most explicit waits.',
+      interviewAnswer: 'Playwright fundamentally changes how waiting works. In Selenium, you frequently use Explicit Waits (`WebDriverWait`) to wait for elements to be visible or clickable to avoid `ElementNotInteractableException`. \n\nPlaywright has **Auto-waiting** built-in. Before it performs an action like `page.click()`, it automatically performs a series of actionability checks. It waits for the element to be: 1) Attached to the DOM, 2) Visible, 3) Stable (not animating), 4) Ready to receive events (not obscured by other elements), and 5) Enabled. \n\nIf these checks pass, it acts. If they don\'t within the timeout (default 30s), it fails. This eliminates 90% of explicit wait code in tests and makes them incredibly stable.',
+      detailedExplanation: 'You can still perform explicit waits if needed: `await page.waitForSelector(\'.my-class\')` or wait for network state `await page.waitForLoadState(\'networkidle\')`.',
+      simpleExplanation: 'In Selenium, you have to tell the script "wait until the button appears, then click." In Playwright, you just say "click the button," and Playwright is smart enough to wait for it to be ready on its own.',
+      realWorldExample: 'A button has a 2-second fade-in animation. Selenium might try to click it while it\'s still fading (failing). Playwright waits for the animation to finish (element becomes "stable") before clicking.',
+      projectExample: 'When migrating from Selenium to Playwright, we deleted hundreds of lines of `WebDriverWait` code. The Playwright tests were shorter, cleaner, and less flaky without them.',
+      codeCommand: '// Playwright (No explicit waits needed!)\nawait page.goto(\'https://example.com\');\n// Playwright automatically waits for this button to be visible and clickable\nawait page.click(\'#login-btn\');\n\n// If you MUST wait explicitly (e.g., for an assertion)\nawait page.waitForSelector(\'.welcome-message\');\n\n// Wait for network to be quiet\nawait page.waitForLoadState(\'networkidle\');',
+      expectedOutput: 'Action executes successfully without manual wait logic.',
+      followUpQ: 'Are there situations where Playwright\'s auto-wait is not enough?',
+      followUpA: 'Yes. 1) When an element is technically visible and clickable, but the backend data hasn\'t loaded yet. In this case, I wait for the specific API response: `await page.waitForResponse(\'**/api/data\')`. 2) When waiting for an element to disappear: `await page.waitForSelector(\'.spinner\', { state: \'hidden\' })`. 3) Waiting for a specific network state: `await page.waitForLoadState(\'networkidle\')`.',
+      seniorFollowUpQ: 'How does Playwright determine if an element is "stable"?',
+      seniorFollowUpA: 'Playwright checks the element\'s bounding box (x, y, width, height) over two consecutive animation frames. If the bounding box remains identical, it considers the element stable (meaning it has stopped animating/moving on the screen).',
+      commonMistake: 'Adding `page.waitForTimeout(5000)` (hard sleep) in Playwright tests — it defeats the purpose of auto-wait.',
+      bestPractice: 'Trust auto-waiting. Use network-based waits (`waitForResponse`) if UI is ready before data is.'
+    }
+  ]
+};

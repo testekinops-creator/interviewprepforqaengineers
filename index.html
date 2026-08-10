@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>QA Interview Bible — 7-8 Year Senior SDET Preparation</title>
+<meta name="description" content="The ultimate QA/SDET interview preparation resource for 7-8 year experienced automation engineers. Covers Selenium, Playwright, Java, API, SQL, Git, Linux, Jenkins, Framework Design, and Senior Scenarios."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Kalam:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<!-- Ambient background -->
+<div class="ambient-bg" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- Mobile overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h6"/></svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-title">QA Bible</span>
+        <span class="logo-sub">7-8 Year SDET Prep</span>
+      </div>
+    </div>
+    <button class="sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="sidebar-search">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="globalSearch" placeholder="Search questions..." aria-label="Search all questions"/>
+  </div>
+
+  <nav class="sidebar-nav" id="sidebarNav">
+    <div class="nav-group">
+      <div class="nav-group-title">📋 Overview</div>
+      <a href="#" class="nav-item active" data-section="dashboard"><span class="nav-icon">🏠</span>Dashboard</a>
+      <a href="#" class="nav-item" data-section="strategy"><span class="nav-icon">🎯</span>Interview Strategy</a>
+      <a href="#" class="nav-item" data-section="prep-plan"><span class="nav-icon">📅</span>30-Day Prep Plan</a>
+      <a href="#" class="nav-item" data-section="skill-matrix"><span class="nav-icon">📊</span>Skill Matrix</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">🧪 Manual Testing</div>
+      <a href="#" class="nav-item" data-section="manual-testing"><span class="nav-icon">✅</span>Fundamentals &amp; Testing Types</a>
+      <a href="#" class="nav-item" data-section="sdlc-stlc"><span class="nav-icon">🔄</span>SDLC & STLC</a>
+      <a href="#" class="nav-item" data-section="test-design"><span class="nav-icon">📐</span>Test Case Design</a>
+      <a href="#" class="nav-item" data-section="defect-mgmt"><span class="nav-icon">🐛</span>Defect Management</a>
+      <a href="#" class="nav-item" data-section="agile-scrum"><span class="nav-icon">🏃</span>Agile & Scrum</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">🌐 Selenium</div>
+      <a href="#" class="nav-item" data-section="selenium-fundamentals"><span class="nav-icon">🔧</span>Fundamentals</a>
+      <a href="#" class="nav-item" data-section="selenium-locators"><span class="nav-icon">🎯</span>Locators & XPath</a>
+      <a href="#" class="nav-item" data-section="sel-waits"><span class="nav-icon">⏱️</span>Waits &amp; Synchronization</a>
+      <a href="#" class="nav-item" data-section="selenium-browser-handling"><span class="nav-icon">🧭</span>WebElements &amp; Browser Handling</a>
+      <a href="#" class="nav-item" data-section="selenium-advanced"><span class="nav-icon">⚡</span>Advanced Selenium</a>
+      <a href="#" class="nav-item" data-section="selenium-exceptions"><span class="nav-icon">🚨</span>Exceptions</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">☕ Java</div>
+      <a href="#" class="nav-item" data-section="java-core"><span class="nav-icon">📦</span>Core & OOP</a>
+      <a href="#" class="nav-item" data-section="java-collections"><span class="nav-icon">📚</span>Collections</a>
+      <a href="#" class="nav-item" data-section="java-strings"><span class="nav-icon">🔤</span>Strings & Exceptions</a>
+      <a href="#" class="nav-item" data-section="java-coding"><span class="nav-icon">💻</span>Coding Programs</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">🧩 Framework</div>
+      <a href="#" class="nav-item" data-section="testng"><span class="nav-icon">🧪</span>TestNG</a>
+      <a href="#" class="nav-item" data-section="maven"><span class="nav-icon">📋</span>Maven</a>
+      <a href="#" class="nav-item" data-section="framework-design"><span class="nav-icon">🏗️</span>Framework Design</a>
+      <a href="#" class="nav-item" data-section="pom-design"><span class="nav-icon">📄</span>POM &amp; Design Patterns</a>
+      <a href="#" class="nav-item" data-section="data-driven"><span class="nav-icon">📊</span>Data Driven</a>
+      <a href="#" class="nav-item" data-section="hybrid-framework"><span class="nav-icon">🧩</span>Hybrid Framework</a>
+      <a href="#" class="nav-item" data-section="framework-operations"><span class="nav-icon">📈</span>Reporting / Logging / CI</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">🎭 Playwright</div>
+      <a href="#" class="nav-item" data-section="pw-fundamentals"><span class="nav-icon">🎬</span>Fundamentals</a>
+      <a href="#" class="nav-item" data-section="pw-locators"><span class="nav-icon">🎯</span>Locators & Actions</a>
+      <a href="#" class="nav-item" data-section="pw-assertions-fixtures"><span class="nav-icon">✅</span>Assertions &amp; Fixtures</a>
+      <a href="#" class="nav-item" data-section="pw-advanced"><span class="nav-icon">⚡</span>Advanced</a>
+      <a href="#" class="nav-item" data-section="pw-coding"><span class="nav-icon">💻</span>Coding</a>
+      <a href="#" class="nav-item" data-section="pw-framework"><span class="nav-icon">🏗️</span>Framework Design</a>
+      <a href="#" class="nav-item" data-section="pw-commands"><span class="nav-icon">📋</span>Command Cheat Sheet</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">🔌 API Testing</div>
+      <a href="#" class="nav-item" data-section="api-fundamentals"><span class="nav-icon">🌐</span>API Fundamentals</a>
+      <a href="#" class="nav-item" data-section="http-methods"><span class="nav-icon">📡</span>HTTP Methods & Codes</a>
+      <a href="#" class="nav-item" data-section="api-request-response"><span class="nav-icon">📬</span>Request / Response</a>
+      <a href="#" class="nav-item" data-section="api-auth"><span class="nav-icon">🔐</span>Authentication &amp; Authorization</a>
+      <a href="#" class="nav-item" data-section="postman"><span class="nav-icon">📮</span>Postman</a>
+      <a href="#" class="nav-item" data-section="rest-assured"><span class="nav-icon">🔗</span>REST Assured</a>
+      <a href="#" class="nav-item" data-section="api-scenarios"><span class="nav-icon">🎭</span>API Scenarios</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">🗄️ Database</div>
+      <a href="#" class="nav-item" data-section="sql"><span class="nav-icon">📊</span>SQL</a>
+      <a href="#" class="nav-item" data-section="sql-coding"><span class="nav-icon">💻</span>SQL Coding</a>
+      <a href="#" class="nav-item" data-section="sql-advanced"><span class="nav-icon">📈</span>Joins &amp; Advanced SQL</a>
+      <a href="#" class="nav-item" data-section="db-testing"><span class="nav-icon">🔍</span>Database Testing</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">🛠️ DevOps & Tools</div>
+      <a href="#" class="nav-item" data-section="git"><span class="nav-icon">📂</span>Git</a>
+      <a href="#" class="nav-item" data-section="linux"><span class="nav-icon">🐧</span>Linux Commands</a>
+      <a href="#" class="nav-item" data-section="jenkins"><span class="nav-icon">⚙️</span>Jenkins / CI-CD</a>
+      <a href="#" class="nav-item" data-section="docker-cloud"><span class="nav-icon">🐳</span>Docker & Cloud</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">🏆 Senior Level</div>
+      <a href="#" class="nav-item" data-section="senior-scenarios"><span class="nav-icon">🎖️</span>Senior Scenarios</a>
+      <a href="#" class="nav-item" data-section="qa-metrics"><span class="nav-icon">📊</span>QA Strategy &amp; Metrics</a>
+      <a href="#" class="nav-item" data-section="tricky-questions"><span class="nav-icon">🧩</span>Tricky Questions</a>
+      <a href="#" class="nav-item" data-section="project-resume"><span class="nav-icon">📄</span>Project & Resume</a>
+      <a href="#" class="nav-item" data-section="mock-interviews"><span class="nav-icon">🎙️</span>Mock Interviews</a>
+      <a href="#" class="nav-item" data-section="hr-behavioral"><span class="nav-icon">🤝</span>HR / Behavioral</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">🚀 Quick Reference</div>
+      <a href="#" class="nav-item" data-section="coding-round"><span class="nav-icon">⌨️</span>Coding Round</a>
+      <a href="#" class="nav-item" data-section="cheat-sheet"><span class="nav-icon">📝</span>Command Cheat Sheet</a>
+      <a href="#" class="nav-item" data-section="quick-revision"><span class="nav-icon">⚡</span>Last 24 Hours</a>
+      <a href="#" class="nav-item" data-section="top-200"><span class="nav-icon">🔥</span>Top 200 Must-Know</a>
+      <a href="#" class="nav-item" data-section="top-50-senior"><span class="nav-icon">⭐</span>Top 50 Senior QA</a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="progress-ring-wrap">
+      <svg class="progress-ring" viewBox="0 0 60 60">
+        <circle cx="30" cy="30" r="26" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="4"/>
+        <circle cx="30" cy="30" r="26" fill="none" stroke="url(#progressGrad)" stroke-width="4" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="163.36" id="progressCircle" transform="rotate(-90 30 30)"/>
+        <defs><linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs>
+      </svg>
+      <span class="progress-pct" id="progressPct">0%</span>
+    </div>
+    <span class="progress-label">Questions Completed</span>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content" id="mainContent">
+  <!-- Top Bar -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" aria-label="Open navigation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div class="topbar-actions">
+      <div class="filter-group">
+        <select id="filterDifficulty" aria-label="Filter by difficulty">
+          <option value="all">All Levels</option>
+          <option value="1">1 — Beginner</option>
+          <option value="2">2 — Basic</option>
+          <option value="3">3 — Intermediate</option>
+          <option value="4">4 — Advanced</option>
+          <option value="5">5 — Senior/Architect</option>
+        </select>
+        <select id="filterImportance" aria-label="Filter by importance">
+          <option value="all">All Importance</option>
+          <option value="must">🔴 Must Know</option>
+          <option value="important">🟠 Important</option>
+          <option value="good">🟡 Good to Know</option>
+          <option value="senior">🔵 Senior Level</option>
+        </select>
+      </div>
+      <button class="icon-btn" id="bookmarkFilter" title="Show bookmarked only">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </button>
+      <button class="icon-btn focus-btn" id="focusToggle" title="Focus mode" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h6M4 4v6M20 4h-6M20 4v6M4 20h6M4 20v-6M20 20h-6M20 20v-6"/></svg>
+      </button>
+      <button class="icon-btn" id="themeToggle" title="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-moon" style="display:none"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Content Area -->
+  <div class="content-area" id="contentArea">
+    <!-- Dashboard Section -->
+    <section class="section-panel active" id="section-dashboard">
+      <div class="dashboard-hero">
+        <h1>🏆 QA Interview Bible</h1>
+        <p class="hero-sub">Master QA/SDET Interview Preparation — 7-8 Years Experience Level</p>
+        <p class="hero-desc">Comprehensive preparation covering Selenium, Playwright, Java, API, SQL, Git, Linux, Jenkins, Framework Design, Senior Scenarios, and more.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card glass">
+          <div class="stat-icon-wrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <div class="stat-info"><span class="stat-number" id="statTotal">0</span><span class="stat-label">Total Questions</span></div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-icon-wrap green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m22 4-10 10-3-3"/></svg></div>
+          <div class="stat-info"><span class="stat-number" id="statCompleted">0</span><span class="stat-label">Completed</span></div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-icon-wrap amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+          <div class="stat-info"><span class="stat-number" id="statBookmarked">0</span><span class="stat-label">Bookmarked</span></div>
+        </div>
+        <div class="stat-card glass">
+          <div class="stat-icon-wrap purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div>
+          <div class="stat-info"><span class="stat-number" id="statSections">0</span><span class="stat-label">Sections</span></div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="dash-card glass">
+          <h3>📊 Topic Progress</h3>
+          <div class="topic-progress-list" id="topicProgressList"></div>
+        </div>
+        <div class="dash-card glass">
+          <h3>🎯 Quick Actions</h3>
+          <div class="quick-actions">
+            <button class="action-btn" onclick="QAApp.navigateTo('quick-revision')">⚡ Last 24 Hours Revision</button>
+            <button class="action-btn" onclick="QAApp.navigateTo('top-200')">🔥 Top 200 Must-Know</button>
+            <button class="action-btn" onclick="QAApp.startMockInterview()">🎙️ Start Mock Interview</button>
+            <button class="action-btn" onclick="QAApp.navigateTo('cheat-sheet')">📝 Command Cheat Sheet</button>
+            <button class="action-btn" onclick="QAApp.navigateTo('tricky-questions')">🧩 Tricky Questions</button>
+            <button class="action-btn" onclick="QAApp.navigateTo('coding-round')">⌨️ Coding Round</button>
+          </div>
+        </div>
+        <div class="dash-card glass full-width">
+          <h3>🔴 Importance Breakdown</h3>
+          <div class="importance-bars" id="importanceBars"></div>
+        </div>
+      </div>
+
+      <div class="candidate-profile glass">
+        <h3>👤 Candidate Profile</h3>
+        <div class="profile-grid">
+          <div class="profile-item"><span class="profile-label">Experience</span><span class="profile-value">7-8 Years QA/Automation</span></div>
+          <div class="profile-item"><span class="profile-label">Core Skills</span><span class="profile-value">Selenium WebDriver, Java, TestNG, Maven</span></div>
+          <div class="profile-item"><span class="profile-label">Framework</span><span class="profile-value">POM, Data-Driven, Hybrid</span></div>
+          <div class="profile-item"><span class="profile-label">API</span><span class="profile-value">REST API, Postman, REST Assured</span></div>
+          <div class="profile-item"><span class="profile-label">CI/CD</span><span class="profile-value">Jenkins, Git, Maven, Allure</span></div>
+          <div class="profile-item"><span class="profile-label">Domains</span><span class="profile-value">Salesforce, B2B E-commerce, LMS</span></div>
+          <div class="profile-item"><span class="profile-label">Testing Types</span><span class="profile-value">Regression, Smoke, Integration, E2E, Data Migration</span></div>
+          <div class="profile-item"><span class="profile-label">Methodology</span><span class="profile-value">Agile/Scrum, Cross-Browser</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search Results Section -->
+    <section class="section-panel" id="section-search-results">
+      <h2>🔍 Search Results</h2>
+      <p class="search-info" id="searchInfo"></p>
+      <div class="questions-container" id="searchResultsContainer"></div>
+    </section>
+
+    <!-- All other sections will be dynamically generated -->
+  </div>
+</main>
+
+<!-- Mock Interview Modal -->
+<div class="modal-overlay" id="mockModal">
+  <div class="modal-card mock-modal">
+    <div class="mock-header">
+      <h3>🎙️ Mock Interview Mode</h3>
+      <button class="modal-close" id="mockClose">&times;</button>
+    </div>
+    <div class="mock-timer" id="mockTimer">02:00</div>
+    <div class="mock-question" id="mockQuestion">Click "Next Question" to begin...</div>
+    <div class="mock-answer" id="mockAnswer" style="display:none"></div>
+    <div class="mock-actions">
+      <button class="btn btn-primary" id="mockNext">Next Question</button>
+      <button class="btn btn-outline" id="mockReveal">Show Answer</button>
+      <button class="btn btn-ghost" id="mockStop">End Interview</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span id="toastMsg">Saved</span></div>
+
+<script src="data/strategy.js"></script>
+<script src="data/manual-testing.js"></script>
+<script src="data/test-design.js"></script>
+<script src="data/defect-mgmt.js"></script>
+<script src="data/agile-scrum.js"></script>
+<script src="data/selenium.js"></script>
+<script src="data/selenium-locators.js"></script>
+<script src="data/selenium-waits.js"></script>
+<script src="data/selenium-advanced.js"></script>
+<script src="data/selenium-exceptions.js"></script>
+<script src="data/java-core.js"></script>
+<script src="data/java-collections.js"></script>
+<script src="data/java-strings.js"></script>
+<script src="data/java-coding.js"></script>
+<script src="data/testng.js"></script>
+<script src="data/maven.js"></script>
+<script src="data/framework.js"></script>
+<script src="data/playwright.js"></script>
+<script src="data/playwright-commands.js"></script>
+<script src="data/playwright-coding.js"></script>
+<script src="data/playwright-framework.js"></script>
+<script src="data/api-testing.js"></script>
+<script src="data/rest-assured.js"></script>
+<script src="data/api-scenarios.js"></script>
+<script src="data/sql.js"></script>
+<script src="data/sql-coding.js"></script>
+<script src="data/database-testing.js"></script>
+<script src="data/git.js"></script>
+<script src="data/linux.js"></script>
+<script src="data/jenkins-cicd.js"></script>
+<script src="data/docker-cloud.js"></script>
+<script src="data/senior-scenarios.js"></script>
+<script src="data/tricky-questions.js"></script>
+<script src="data/project-resume.js"></script>
+<script src="data/mock-interviews.js"></script>
+<script src="data/hr-behavioral.js"></script>
+<script src="data/coding-round.js"></script>
+<script src="data/quick-revision.js"></script>
+<script src="data/zz-curriculum-expansions.js"></script>
+<script src="data/zz-senior-depth.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

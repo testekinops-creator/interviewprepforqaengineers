@@ -1,0 +1,86 @@
+/* ═══════════════════════════════════════════════════════════════
+   agile-scrum.js — Agile & Scrum
+   ═══════════════════════════════════════════════════════════════ */
+var defined_sections = defined_sections || {};
+
+defined_sections['agile-scrum'] = {
+  title: '🏃 Agile & Scrum',
+  description: 'Agile methodologies, Scrum ceremonies, Story Points, and QA roles in Sprints',
+  questions: [
+    {
+      id: 'AG001',
+      category: 'Agile',
+      topic: 'Scrum',
+      subtopic: 'Roles and Ceremonies',
+      question: 'What are the main roles and ceremonies in a Scrum team?',
+      whyAsked: 'Ensures you have practical experience working within standard Agile frameworks.',
+      difficulty: 1,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'The 3 roles are Product Owner, Scrum Master, and Development Team. The 4 main ceremonies are Sprint Planning, Daily Stand-up, Sprint Review (Demo), and Sprint Retrospective.',
+      interviewAnswer: 'In a standard Scrum framework, there are three primary roles:\n1. **Product Owner:** Owns the product backlog, defines user stories, and prioritizes work based on business value.\n2. **Scrum Master:** Facilitates the agile process, removes blockers, and ensures the team follows Scrum practices.\n3. **Development Team:** Cross-functional members (Developers, QAs, Designers) who build and test the product.\n\nWe collaborate through four main ceremonies:\n1. **Sprint Planning:** At the start of the sprint, we pull items from the backlog, estimate them, and commit to a Sprint Goal.\n2. **Daily Stand-up:** A 15-minute daily sync to discuss what we did yesterday, what we will do today, and any blockers.\n3. **Sprint Review:** At the end of the sprint, we demo the completed, working software to stakeholders.\n4. **Sprint Retrospective:** The team discusses what went well, what went wrong, and how to improve in the next sprint.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Ceremony | Timing | Purpose | QA Role |\n| :--- | :--- | :--- | :--- |\n| **Sprint Planning** | Start of Sprint | Commit to work | Ensure testability, highlight automation effort |\n| **Daily Stand-up**| Daily | Sync progress | Report test status, raise blocker bugs |\n| **Sprint Review** | End of Sprint | Demo to stakeholders | Demo automated tests or signed-off features |\n| **Retrospective** | End of Sprint | Process improvement | Raise issues with environments, test data, or processes |',
+      simpleExplanation: 'Roles: The Boss (PO), The Coach (Scrum Master), The Players (Dev/QA). Ceremonies: Game Plan, Daily Huddle, Post-Game Highlight Reel, Team Therapy Session.',
+      realWorldExample: 'N/A',
+      projectExample: 'In our Retrospective last sprint, I raised that QA was getting squeezed because developers were merging code on the last day. We agreed on a new team rule: No code merges after Wednesday to give QA 2 full days of testing.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'What is Backlog Refinement (Grooming)?',
+      followUpA: 'It is a meeting (usually mid-sprint) where the Product Owner and the team review upcoming user stories. The team asks clarifying questions, breaks down large stories into smaller ones, and estimates them so they are "Ready" for the next Sprint Planning.',
+      seniorFollowUpQ: 'How do you handle a Product Owner trying to inject a new feature into the middle of an active sprint?',
+      seniorFollowUpA: 'A sprint backlog is generally locked once committed. I would discuss the impact with the Scrum Master. If the business absolutely requires it, the PO must remove an equivalent amount of story points from the current sprint to maintain the team\'s capacity and avoid burnout.',
+      commonMistake: 'Using the Daily Stand-up as a detailed technical problem-solving session.',
+      bestPractice: 'Keep stand-ups to 15 minutes. Take technical discussions "offline" after the meeting.'
+    },
+    {
+      id: 'AG002',
+      category: 'Agile',
+      topic: 'Scrum',
+      subtopic: 'DoR vs DoD',
+      question: 'What is the difference between Definition of Ready (DoR) and Definition of Done (DoD)?',
+      whyAsked: 'Crucial for understanding entry and exit criteria for user stories.',
+      difficulty: 2,
+      importance: 'must',
+      interviewType: 'Technical',
+      thirtySecAnswer: 'DoR is the checklist a user story must meet before it can be pulled into a sprint (e.g., clear acceptance criteria, estimated). DoD is the checklist a story must meet before it can be closed (e.g., code reviewed, all tests passed, deployed to QA).',
+      interviewAnswer: 'DoR and DoD act as the entry and exit gates for our Sprint workflow.\n\n**Definition of Ready (DoR)** focuses on the Planning phase. A story is not "Ready" unless it has clear acceptance criteria, UI mockups (if applicable), and has been estimated by the team. If a story lacks details, QA rejects it during Backlog Grooming because we cannot write tests for ambiguous requirements.\n\n**Definition of Done (DoD)** focuses on the Completion phase. A developer cannot just say "My code works" and close the ticket. The DoD enforces quality: the code must be peer-reviewed, unit tests must pass, UI automation must be written, manual exploratory testing must be signed off by QA, and it must be deployed to the Staging environment. Only then is it "Done".',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | Definition of Ready (DoR) | Definition of Done (DoD) |\n| :--- | :--- | :--- |\n| **Phase** | Entry Criteria (Before Sprint) | Exit Criteria (End of Sprint) |\n| **Target** | The User Story ticket | The Software Feature |\n| **QA Focus** | Ensure testability, clarify requirements | Execute tests, write automation, sign off |\n| **Example** | "Story has Acceptance Criteria" | "Zero High severity bugs open" |',
+      simpleExplanation: 'DoR means "We have the recipe and all the ingredients, we can start cooking." DoD means "The meal is cooked, plated, and tastes good, we can serve it." ',
+      realWorldExample: 'N/A',
+      projectExample: 'Our team was struggling because developers kept pushing features with no automation. We updated our DoD to explicitly state "API and UI automation scripts must be merged into main". This forced developers to pair with QA to get automation done before closing the sprint.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'Who creates the Definition of Done?',
+      followUpA: 'The DoD is a collaborative agreement created and owned by the entire Scrum Team (PO, SM, Dev, QA). It applies universally to all stories in the sprint.',
+      seniorFollowUpQ: 'What happens if a user story meets the Acceptance Criteria but fails the Definition of Done?',
+      seniorFollowUpA: 'The story cannot be closed or demoed in the Sprint Review. It "spills over" into the next sprint. For example, if the feature works perfectly (meets AC), but the automated tests aren\'t finished (fails DoD), the story remains open.',
+      commonMistake: 'Confusing Acceptance Criteria (specific to one story) with DoD (applies to all stories).',
+      bestPractice: 'Print out the DoD and stick it on the wall (or in the Jira dashboard) so the team never forgets the quality standards.'
+    },
+    {
+      id: 'AG003',
+      category: 'Agile',
+      topic: 'Estimation',
+      subtopic: 'Written Test - Story Points',
+      question: 'WRITTEN TEST: Explain Story Points. Why do we estimate in Story Points instead of Hours?',
+      whyAsked: 'Tests deep Agile understanding. Many junior teams estimate in hours, which is an anti-pattern.',
+      difficulty: 3,
+      importance: 'important',
+      interviewType: 'Written Test',
+      thirtySecAnswer: 'Story points measure complexity, effort, and risk using relative sizing (Fibonacci sequence). We use points instead of hours because hours vary based on a developer\'s experience, while the complexity of a task remains constant for the whole team.',
+      interviewAnswer: 'In Scrum, we estimate using **Story Points** (usually following the Fibonacci sequence: 1, 2, 3, 5, 8, 13). \n\nStory points measure three things: **Complexity, Effort, and Risk**.\n\nWe do not use hours because time is subjective. A senior developer might finish a task in 2 hours, while a junior might take 8 hours. If we estimate in hours, the estimate changes depending on who picks up the ticket. \n\nHowever, the *complexity* of the task is objective. If we agree that building a simple Login Page is a "3 point" baseline, then building a complex Checkout Flow with Stripe integration is relatively an "8 point" task. It is an 8 point task regardless of who works on it. This allows the team to accurately calculate their Velocity (how many points they complete per sprint) and predict long-term delivery timelines.',
+      detailedExplanation: 'SIDE-BY-SIDE COMPARISON:\n\n| Feature | Story Points | Hours / Time |\n| :--- | :--- | :--- |\n| **Measures** | Complexity, Effort, Risk | Time elapsed |\n| **Nature** | Relative (Compared to other stories) | Absolute |\n| **Consistency**| Constant across the team | Varies by individual skill level |\n| **Usage** | Long-term planning, Velocity tracking | Short-term task tracking |',
+      simpleExplanation: 'If you ask a pro runner and a child how long it takes to run a mile, you get different answers. But if you ask them "Is a marathon harder than a 1-mile run?", they both agree a marathon is 26x harder. Points measure the distance, not the speed of the runner.',
+      realWorldExample: 'N/A',
+      projectExample: 'During Planning Poker, a developer estimated a story as 2 points, but I (QA) estimated it as 8 points. When asked why, I pointed out that while the code change was simple, the feature impacted 15 different downstream reporting services that all needed exhaustive regression testing. We settled on 5 points.',
+      codeCommand: 'N/A',
+      expectedOutput: 'N/A',
+      followUpQ: 'What is Velocity in Agile?',
+      followUpA: 'Velocity is the average number of Story Points a team completes in a sprint. If a team completes 30 points in Sprint 1, 32 in Sprint 2, and 28 in Sprint 3, their average velocity is 30. The PO uses this to predict how many sprints a large project will take.',
+      seniorFollowUpQ: 'Should QA testing effort be included in the Story Point estimation?',
+      seniorFollowUpA: 'Absolutely. A user story represents a vertical slice of value delivered to the user. It is not done until it is tested. The estimation must include development, manual testing, and automation scripting. A 1-line code change that requires 3 days of regression testing is a high-point story.',
+      commonMistake: 'Equating 1 Story Point to 1 Day of work.',
+      bestPractice: 'Use Planning Poker to ensure Devs, QAs, and Design all have an equal voice in estimating complexity.'
+    }
+  ]
+};
