@@ -220,6 +220,40 @@
         </div>
       </div>
 
+      <div class="study-command-grid" aria-label="Personal study tools">
+        <section class="study-command-card glass">
+          <div class="study-command-heading">
+            <div><span class="study-command-kicker">Daily momentum</span><h3>Today's study goal</h3></div>
+            <strong class="goal-count" id="dailyGoalProgress">0 / 5</strong>
+          </div>
+          <div class="daily-goal-track" aria-hidden="true"><span id="dailyGoalBar"></span></div>
+          <div class="daily-goal-controls">
+            <label for="dailyGoalInput">Goal</label>
+            <input id="dailyGoalInput" type="number" min="1" max="50" value="5" inputmode="numeric">
+            <span>questions / day</span>
+          </div>
+          <p class="study-command-note" id="studyStreak">Start with one thoughtful answer today.</p>
+        </section>
+
+        <section class="study-command-card glass review-queue-card">
+          <div class="study-command-heading">
+            <div><span class="study-command-kicker">Spaced revision</span><h3>Smart review queue</h3></div>
+            <strong class="queue-count" id="reviewDueCount">0 due</strong>
+          </div>
+          <div class="review-queue-list" id="reviewQueueList"></div>
+        </section>
+
+        <section class="study-command-card glass backup-card">
+          <div><span class="study-command-kicker">Your progress</span><h3>Keep your preparation safe</h3></div>
+          <p>Download your notes, confidence ratings, progress, and daily history whenever you need a backup.</p>
+          <div class="backup-actions">
+            <button class="backup-btn primary" type="button" data-study-action="export">Export backup</button>
+            <button class="backup-btn" type="button" data-study-action="import">Restore backup</button>
+          </div>
+          <input type="file" id="studyImportInput" accept="application/json,.json" hidden>
+        </section>
+      </div>
+
       <div class="dashboard-grid">
         <div class="dash-card glass">
           <h3>📊 Topic Progress</h3>
@@ -329,6 +363,7 @@
 <script src="data/quick-revision.js"></script>
 <script src="data/zz-curriculum-expansions.js"></script>
 <script src="data/zz-senior-depth.js"></script>
+<script src="data/zz-coverage-completion.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

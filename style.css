@@ -405,6 +405,7 @@ body {
   background: var(--bg-input);
   border: 1px solid var(--border);
   color: var(--text-primary);
+  color-scheme: dark;
   font-family: var(--font-body);
   font-size: 12px;
   padding: 6px 10px;
@@ -415,6 +416,28 @@ body {
 }
 
 .filter-group select:focus { border-color: var(--accent-blue); }
+
+/* Native option panels need explicit colors; unlike the closed select control,
+   they do not consistently inherit CSS custom properties in Chromium. */
+[data-theme="dark"] .filter-group select,
+[data-theme="dark"] .filter-group select option {
+  background-color: #111827;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .filter-group select option:checked {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+[data-theme="light"] .filter-group select {
+  color-scheme: light;
+}
+
+[data-theme="light"] .filter-group select option {
+  background-color: #ffffff;
+  color: #1e293b;
+}
 
 .icon-btn {
   background: none;

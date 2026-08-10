@@ -7,7 +7,20 @@ async function generateExcel() {
     
     // 1. Gather all data from existing .js files
     const dataDir = path.join(__dirname, 'data');
-    const files = fs.readdirSync(dataDir).filter(f => f.endsWith('.js')).sort();
+    const finalPacks = [
+        'zz-curriculum-expansions.js',
+        'zz-senior-depth.js',
+        'zz-coverage-completion.js'
+    ];
+    const files = fs.readdirSync(dataDir)
+        .filter(f => f.endsWith('.js'))
+        .sort((a, b) => {
+            const aIndex = finalPacks.indexOf(a);
+            const bIndex = finalPacks.indexOf(b);
+            const aRank = aIndex === -1 ? 0 : aIndex + 1;
+            const bRank = bIndex === -1 ? 0 : bIndex + 1;
+            return aRank - bRank || a.localeCompare(b);
+        });
     
     // We will create a fake context to execute the JS files and capture defined_sections
     let defined_sections = {};
@@ -71,6 +84,13 @@ async function generateExcel() {
     ];
 
     const sheetSectionMap = {
+        "Senior Scenarios": "senior-scenarios",
+        "Tricky Questions": "tricky-questions",
+        "Project Questions": "project-resume",
+        "Resume Questions": "project-resume",
+        "Mock Interview": "mock-interviews",
+        "Coding Round": "coding-round",
+        "Quick Revision": "quick-revision",
         "Selenium Browser Handling": "selenium-browser-handling",
         "Advanced SQL": "sql-advanced",
         "Data Driven Framework": "data-driven",
