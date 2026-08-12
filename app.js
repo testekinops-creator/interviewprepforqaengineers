@@ -706,7 +706,7 @@ const QAApp = (() => {
         updateProgress();
         showToast('Backup restored — your study data is ready');
       } catch (error) {
-        showToast('That file is not a valid QA Bible backup');
+        showToast('That file is not a valid QA Mastery backup');
       }
     };
     reader.readAsText(file);
