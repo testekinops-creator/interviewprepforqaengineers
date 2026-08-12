@@ -9,6 +9,10 @@ const QAApp = (() => {
   let bookmarks = JSON.parse(localStorage.getItem('qa_bookmarks') || '[]');
   let theme = localStorage.getItem('qa_theme') || 'dark';
   let dayChecks = JSON.parse(localStorage.getItem('qa_day_checks') || '{}');
+  let notes = JSON.parse(localStorage.getItem('qa_question_notes') || '{}');
+  let reviewState = JSON.parse(localStorage.getItem('qa_review_state') || '{}');
+  let dailyGoal = Math.min(50, Math.max(1, Number(localStorage.getItem('qa_daily_goal') || 5)));
+  let studyActivity = JSON.parse(localStorage.getItem('qa_study_activity') || '{}');
   let allQuestions = [];
   let filteredQuestions = [];
   let mockTimer = null;
@@ -37,6 +41,7 @@ const QAApp = (() => {
     addNavCounts();
     renderDashboard();
     bindEvents();
+    bindDashboardEvents();
     updateProgress();
   }
 
@@ -294,6 +299,8 @@ const QAApp = (() => {
         
         ${q.projectExample ? `<div class="q-detail-section"><div class="q-detail-label">💼 Project Example</div><div class="q-detail-content">${formatAnswer(q.projectExample)}</div></div>` : ''}
         ${q.experienceNote ? `<div class="experience-note"><span>Experience Lens</span><p>${formatAnswer(q.experienceNote)}</p></div>` : ''}
+        ${renderConfidenceControls(q)}
+        ${renderPersonalNotes(q)}
         
         ${q.codeCommand ? `<div class="q-detail-section"><div class="q-detail-label">💻 Code / Command</div><div class="code-block"><button class="code-copy" onclick="QAApp.copyCode(this)">Copy</button><code>${escapeHtml(q.codeCommand)}</code></div></div>` : ''}
         
@@ -350,6 +357,103 @@ const QAApp = (() => {
     return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  // ── Personal study tools ──
+  function getDayKey(offset = 0) {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + offset);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  function createReviewRecord(level) {
+    const intervals = { review: 1, practiced: 3, mastered: 7 };
+    return { level, reviewedOn: getDayKey(), dueOn: getDayKey(intervals[level] || 1) };
+  }
+
+  function getReviewCopy(id) {
+    const state = reviewState[id];
+    if (!state) return { label: 'Choose confidence to schedule a revisit', due: '' };
+    const labels = { review: 'Review soon', practiced: 'Practiced', mastered: 'Mastered' };
+    const today = getDayKey();
+    const due = state.dueOn <= today ? (state.dueOn === today ? 'Review today' : 'Revision overdue') : `Next review ${state.dueOn}`;
+    return { label: labels[state.level] || 'Practiced', due };
+  }
+
+  function renderConfidenceControls(q) {
+    const state = reviewState[q.id] || {};
+    const copy = getReviewCopy(q.id);
+    return `<div class="confidence-panel">
+      <div class="confidence-heading"><div><span>Confidence check</span><strong>${copy.label}</strong></div><small>${copy.due}</small></div>
+      <div class="confidence-actions">
+        <button type="button" class="confidence-choice review ${state.level === 'review' ? 'active' : ''}" data-confidence="review" data-id="${q.id}">Need review</button>
+        <button type="button" class="confidence-choice practiced ${state.level === 'practiced' ? 'active' : ''}" data-confidence="practiced" data-id="${q.id}">Practiced</button>
+        <button type="button" class="confidence-choice mastered ${state.level === 'mastered' ? 'active' : ''}" data-confidence="mastered" data-id="${q.id}">Mastered</button>
+      </div>
+    </div>`;
+  }
+
+  function renderPersonalNotes(q) {
+    const note = escapeHtml(notes[q.id] || '');
+    return `<div class="personal-notes">
+      <div class="notes-heading"><span>My interview note</span><small>Saved only in this browser</small></div>
+      <textarea data-note-input="${q.id}" placeholder="Write your project example, key phrase, or follow-up here…">${note}</textarea>
+      <div class="notes-footer"><span>Tip: save a real example using Situation → Action → Result.</span><button type="button" data-save-note="${q.id}">Save note</button></div>
+    </div>`;
+  }
+
+  function savePersonalNote(id, value, button) {
+    const cleanValue = value.trim();
+    if (cleanValue) notes[id] = cleanValue;
+    else delete notes[id];
+    localStorage.setItem('qa_question_notes', JSON.stringify(notes));
+    if (button) {
+      const original = button.textContent;
+      button.textContent = 'Saved ✓';
+      setTimeout(() => { button.textContent = original; }, 1400);
+    }
+    showToast(cleanValue ? 'Personal note saved' : 'Personal note cleared');
+  }
+
+  function saveReviewState() {
+    localStorage.setItem('qa_review_state', JSON.stringify(reviewState));
+  }
+
+  function recordStudyActivity(id) {
+    const today = getDayKey();
+    studyActivity[today] = studyActivity[today] || {};
+    studyActivity[today][id] = true;
+    localStorage.setItem('qa_study_activity', JSON.stringify(studyActivity));
+  }
+
+  function setQuestionConfidence(id, level) {
+    reviewState[id] = createReviewRecord(level);
+    progress[id] = level === 'mastered' ? 'done' : 'in-progress';
+    recordStudyActivity(id);
+    saveReviewState();
+    saveProgress();
+
+    document.querySelectorAll(`.q-card[data-id="${id}"]`).forEach(card => {
+      const status = card.querySelector('.q-status');
+      if (status) status.className = 'q-status ' + (level === 'mastered' ? 'done' : 'in-progress');
+      const panel = card.querySelector('.confidence-panel');
+      if (panel) {
+        panel.querySelectorAll('.confidence-choice').forEach(choice => {
+          choice.classList.toggle('active', choice.dataset.confidence === level);
+        });
+        const copy = getReviewCopy(id);
+        const label = panel.querySelector('.confidence-heading strong');
+        const due = panel.querySelector('.confidence-heading small');
+        if (label) label.textContent = copy.label;
+        if (due) due.textContent = copy.due;
+      }
+    });
+
+    const question = allQuestions.find(item => item.id === id);
+    if (question?._section) updateSectionProgressUI(question._section);
+    updateProgress();
+    showToast(level === 'mastered' ? 'Marked mastered — revision scheduled in 7 days' : 'Confidence saved — a review has been scheduled');
+  }
+
   // ── Bind Card Events ──
   function bindCardEvents(container) {
     // Toggle expand
@@ -370,6 +474,13 @@ const QAApp = (() => {
         const next = current === 'not-started' ? 'in-progress' : current === 'in-progress' ? 'done' : 'not-started';
         progress[id] = next;
         btn.className = 'q-status ' + (next === 'in-progress' ? 'in-progress' : next === 'done' ? 'done' : '');
+        if (next === 'in-progress' || next === 'done') {
+          recordStudyActivity(id);
+          if (!reviewState[id]) {
+            reviewState[id] = createReviewRecord(next === 'done' ? 'mastered' : 'practiced');
+            saveReviewState();
+          }
+        }
         saveProgress();
         updateProgress();
         const question = allQuestions.find(item => item.id === id);
@@ -394,6 +505,23 @@ const QAApp = (() => {
         }
         localStorage.setItem('qa_bookmarks', JSON.stringify(bookmarks));
         updateProgress();
+      });
+    });
+
+    // Confidence rating and personal notes
+    container.querySelectorAll('[data-confidence]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setQuestionConfidence(btn.dataset.id, btn.dataset.confidence);
+      });
+    });
+
+    container.querySelectorAll('[data-save-note]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.saveNote;
+        const input = container.querySelector(`[data-note-input="${id}"]`);
+        if (input) savePersonalNote(id, input.value, btn);
       });
     });
   }
@@ -446,6 +574,142 @@ const QAApp = (() => {
     focusMode = !focusMode;
     localStorage.setItem('qa_focus_mode', String(focusMode));
     applyFocusMode(focusMode);
+  }
+
+  function getReviewQueue() {
+    const today = getDayKey();
+    const importanceRank = { must: 0, senior: 1, important: 2, good: 3 };
+    const due = allQuestions.filter(q => reviewState[q.id] && reviewState[q.id].dueOn <= today);
+    const candidates = due.length ? due : allQuestions.filter(q => progress[q.id] !== 'done');
+    return candidates.sort((a, b) => {
+      const aDue = reviewState[a.id]?.dueOn || '9999-12-31';
+      const bDue = reviewState[b.id]?.dueOn || '9999-12-31';
+      return aDue.localeCompare(bDue) || (importanceRank[a.importance] || 4) - (importanceRank[b.importance] || 4) || b.difficulty - a.difficulty;
+    }).slice(0, 4);
+  }
+
+  function getStudyStreak() {
+    let streak = 0;
+    for (let offset = 0; offset < 365; offset++) {
+      const key = getDayKey(-offset);
+      const count = Object.keys(studyActivity[key] || {}).length;
+      if (count >= dailyGoal) streak++;
+      else if (offset > 0 || count === 0) break;
+    }
+    return streak;
+  }
+
+  function renderStudyDashboard() {
+    const todayCount = Object.keys(studyActivity[getDayKey()] || {}).length;
+    const goalProgress = Math.min(100, Math.round((todayCount / dailyGoal) * 100));
+    const progressEl = document.getElementById('dailyGoalProgress');
+    const bar = document.getElementById('dailyGoalBar');
+    const goalInput = document.getElementById('dailyGoalInput');
+    const streakEl = document.getElementById('studyStreak');
+    if (progressEl) progressEl.textContent = `${todayCount} / ${dailyGoal}`;
+    if (bar) bar.style.width = `${goalProgress}%`;
+    if (goalInput) goalInput.value = dailyGoal;
+    if (streakEl) {
+      const streak = getStudyStreak();
+      streakEl.textContent = todayCount >= dailyGoal
+        ? `Goal achieved — ${streak || 1}-day consistency streak. Keep the momentum.`
+        : `${Math.max(0, dailyGoal - todayCount)} more ${dailyGoal - todayCount === 1 ? 'answer' : 'answers'} to complete today's goal.`;
+    }
+
+    const queue = getReviewQueue();
+    const dueCount = allQuestions.filter(q => reviewState[q.id] && reviewState[q.id].dueOn <= getDayKey()).length;
+    const dueEl = document.getElementById('reviewDueCount');
+    const list = document.getElementById('reviewQueueList');
+    if (dueEl) dueEl.textContent = dueCount ? `${dueCount} due` : 'Ready to start';
+    if (list) {
+      list.innerHTML = queue.length ? queue.map(q => {
+        const review = reviewState[q.id];
+        const tag = review ? (review.dueOn <= getDayKey() ? 'Due now' : review.level) : 'High priority';
+        return `<button type="button" class="review-queue-item" data-review-question="${q.id}">
+          <span class="review-queue-copy"><small>${q.topic}</small><strong>${q.question}</strong></span>
+          <span class="review-queue-tag">${tag}</span>
+        </button>`;
+      }).join('') : `<div class="review-queue-empty">Everything is current. Choose a Senior Scenario or a bookmarked question for a fresh practice round.</div>`;
+    }
+  }
+
+  function openReviewQuestion(id) {
+    const question = allQuestions.find(item => item.id === id);
+    if (!question?._section) return;
+    navigateTo(question._section);
+    setTimeout(() => {
+      const card = document.querySelector(`#section-${question._section} .q-card[data-id="${id}"]`);
+      if (card) {
+        card.classList.add('expanded');
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 0);
+  }
+
+  function bindDashboardEvents() {
+    const dashboard = document.getElementById('section-dashboard');
+    if (!dashboard) return;
+    dashboard.addEventListener('click', event => {
+      const reviewButton = event.target.closest('[data-review-question]');
+      if (reviewButton) openReviewQuestion(reviewButton.dataset.reviewQuestion);
+      const action = event.target.closest('[data-study-action]')?.dataset.studyAction;
+      if (action === 'export') exportStudyBackup();
+      if (action === 'import') document.getElementById('studyImportInput')?.click();
+    });
+    dashboard.addEventListener('change', event => {
+      if (event.target.id === 'dailyGoalInput') {
+        dailyGoal = Math.min(50, Math.max(1, Number(event.target.value) || 5));
+        localStorage.setItem('qa_daily_goal', String(dailyGoal));
+        renderStudyDashboard();
+        showToast(`Daily goal set to ${dailyGoal} questions`);
+      }
+      if (event.target.id === 'studyImportInput' && event.target.files?.[0]) importStudyBackup(event.target.files[0]);
+    });
+  }
+
+  function exportStudyBackup() {
+    const backup = {
+      app: 'QA Interview Bible', version: 1, exportedAt: new Date().toISOString(),
+      progress, bookmarks, notes, reviewState, dailyGoal, studyActivity
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `qa-bible-backup-${getDayKey()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast('Backup downloaded successfully');
+  }
+
+  function importStudyBackup(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const backup = JSON.parse(reader.result);
+        if (!backup || typeof backup !== 'object') throw new Error('Invalid backup');
+        progress = backup.progress && typeof backup.progress === 'object' ? backup.progress : {};
+        bookmarks = Array.isArray(backup.bookmarks) ? backup.bookmarks : [];
+        notes = backup.notes && typeof backup.notes === 'object' ? backup.notes : {};
+        reviewState = backup.reviewState && typeof backup.reviewState === 'object' ? backup.reviewState : {};
+        dailyGoal = Math.min(50, Math.max(1, Number(backup.dailyGoal) || 5));
+        studyActivity = backup.studyActivity && typeof backup.studyActivity === 'object' ? backup.studyActivity : {};
+        saveProgress();
+        localStorage.setItem('qa_bookmarks', JSON.stringify(bookmarks));
+        localStorage.setItem('qa_question_notes', JSON.stringify(notes));
+        saveReviewState();
+        localStorage.setItem('qa_daily_goal', String(dailyGoal));
+        localStorage.setItem('qa_study_activity', JSON.stringify(studyActivity));
+        renderDashboard();
+        updateProgress();
+        showToast('Backup restored — your study data is ready');
+      } catch (error) {
+        showToast('That file is not a valid QA Bible backup');
+      }
+    };
+    reader.readAsText(file);
   }
 
   function renderPrepPlan(sec) {
@@ -538,6 +802,8 @@ const QAApp = (() => {
       }
       impBars.innerHTML = html;
     }
+
+    renderStudyDashboard();
   }
 
   // ── Search ──
@@ -634,6 +900,7 @@ const QAApp = (() => {
     const statBook = document.getElementById('statBookmarked');
     if (statComp) statComp.textContent = done;
     if (statBook) statBook.textContent = bookmarks.length;
+    renderStudyDashboard();
   }
 
   function saveProgress() {
