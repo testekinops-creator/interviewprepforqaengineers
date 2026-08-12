@@ -53,7 +53,7 @@ async function generateExcel() {
 
     // 2. Setup Workbook
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'QA Interview Bible';
+    workbook.creator = 'QA Interview Mastery';
     workbook.created = new Date();
 
     // 3. Define the 102 Requested Sheets

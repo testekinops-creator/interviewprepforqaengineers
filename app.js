@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   app.js — QA Interview Bible Core Application
+   app.js — QA Interview Mastery Core Application
    ═══════════════════════════════════════════════════════════════ */
 
 const QAApp = (() => {
@@ -669,7 +669,7 @@ const QAApp = (() => {
 
   function exportStudyBackup() {
     const backup = {
-      app: 'QA Interview Bible', version: 1, exportedAt: new Date().toISOString(),
+      app: 'QA Interview Mastery', version: 1, exportedAt: new Date().toISOString(),
       progress, bookmarks, notes, reviewState, dailyGoal, studyActivity
     };
     const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
