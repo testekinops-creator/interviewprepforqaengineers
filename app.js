@@ -7,7 +7,9 @@ const QAApp = (() => {
   let currentSection = 'dashboard';
   let progress = JSON.parse(localStorage.getItem('qa_progress') || '{}');
   let bookmarks = JSON.parse(localStorage.getItem('qa_bookmarks') || '[]');
-  let theme = localStorage.getItem('qa_theme') || 'dark';
+  const supportedThemes = ['dark', 'light', 'reading'];
+  let theme = supportedThemes.includes(localStorage.getItem('qa_theme')) ? localStorage.getItem('qa_theme') : 'dark';
+  let textScale = ['compact', 'comfortable', 'large'].includes(localStorage.getItem('qa_text_scale')) ? localStorage.getItem('qa_text_scale') : 'comfortable';
   let dayChecks = JSON.parse(localStorage.getItem('qa_day_checks') || '{}');
   let notes = JSON.parse(localStorage.getItem('qa_question_notes') || '{}');
   let reviewState = JSON.parse(localStorage.getItem('qa_review_state') || '{}');
@@ -18,6 +20,83 @@ const QAApp = (() => {
   let mockTimer = null;
   let mockTimeLeft = 120;
   let focusMode = localStorage.getItem('qa_focus_mode') === 'true';
+  let readerPanelOpen = false;
+
+  // Premium, code-native SVG icon system.  Icons inherit the surrounding
+  // color, stay sharp at every density, and replace the old emoji UI.
+  const iconPaths = {
+    dashboard: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 17.5h7M17.5 14v7"/>',
+    target: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m16.5 7.5 4-4M17 3.5h3.5V7"/>',
+    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 14h3M13 14h3M8 17h3"/>',
+    chart: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/><path d="m4 8 5-4 5 5 6-7"/>',
+    clipboard: '<path d="M9 4h6a2 2 0 0 1 2 2v14H5V6a2 2 0 0 1 2-2h2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="m8 13 2 2 4-4"/>',
+    workflow: '<rect x="3" y="4" width="6" height="5" rx="1"/><rect x="15" y="15" width="6" height="5" rx="1"/><rect x="15" y="4" width="6" height="5" rx="1"/><path d="M9 6.5h6M12 6.5v11M12 17.5h3"/>',
+    loop: '<path d="M20 8a8 8 0 0 0-14.8-3L3 8"/><path d="M3 4v4h4M4 16a8 8 0 0 0 14.8 3L21 16"/><path d="M21 20v-4h-4"/>',
+    ruler: '<path d="m4 20 16-16 2 2L6 22z"/><path d="m12 8 2 2M8 12l2 2M16 4l2 2"/>',
+    bug: '<rect x="8" y="7" width="8" height="10" rx="4"/><path d="M12 7V3M8 9 5 7M16 9l3-2M8 12H4M16 12h4M8 15l-3 2M16 15l3 2"/>',
+    activity: '<path d="M3 12h4l2.2-6 4 12 2.2-6H21"/>',
+    browser: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18M7 6h.01M10 6h.01M13 6h.01"/>',
+    crosshair: '<circle cx="12" cy="12" r="5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',
+    timer: '<circle cx="12" cy="13" r="8"/><path d="M9 2h6M12 13l3-2M12 5V2"/>',
+    compass: '<circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8z"/>',
+    zap: '<path d="m13 2-9 12h7l-1 8 9-12h-7z"/>',
+    alert: '<path d="M10.3 3.6 2.8 17a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
+    terminal: '<path d="m5 7 4 4-4 4M12 17h7"/><rect x="3" y="3" width="18" height="18" rx="2"/>',
+    layers: '<path d="m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/>',
+    code: '<path d="m8 9-3 3 3 3M16 9l3 3-3 3M14 5l-4 14"/>',
+    blocks: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="8.5" y="14" width="7" height="7" rx="1"/><path d="M6.5 10v2h9v-2M12 12v2"/>',
+    flask: '<path d="M9 3h6M10 3v6l-5 8a3 3 0 0 0 2.6 4h8.8a3 3 0 0 0 2.6-4l-5-8V3"/><path d="M8 15h8"/>',
+    package: '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',
+    file: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+    database: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/>',
+    play: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m10 9 5 3-5 3z"/>',
+    globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.2 2.5 3.2 5.5 3.2 9S14.2 18.5 12 21c-2.2-2.5-3.2-5.5-3.2-9S9.8 5.5 12 3"/>',
+    server: '<rect x="3" y="4" width="18" height="6" rx="2"/><rect x="3" y="14" width="18" height="6" rx="2"/><path d="M7 7h.01M7 17h.01"/>',
+    mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+    shield: '<path d="M12 3 20 6v5c0 5-3.4 8.5-8 10-4.6-1.5-8-5-8-10V6z"/><path d="m9 12 2 2 4-4"/>',
+    send: '<path d="m21 3-8.5 18-3.2-7.3L3 10.5z"/><path d="M9.3 13.7 21 3"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/>',
+    git: '<circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 6h8M6 8v5a5 5 0 0 0 5 5h5"/>',
+    cloud: '<path d="M7 18h11a4 4 0 0 0 .6-8A6.5 6.5 0 0 0 6.2 8.2 5 5 0 0 0 7 18Z"/>',
+    star: '<path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.8-5.4 2.8 1-6.1-4.4-4.3 6.1-.9z"/>',
+    award: '<circle cx="12" cy="8" r="5"/><path d="m8.5 12.5-1 8 4.5-2.5 4.5 2.5-1-8"/><path d="m10 8 1.3 1.3L14 6.8"/>',
+    sparkles: '<path d="m12 3 1.2 4.3L17.5 9l-4.3 1.2L12 14.5l-1.2-4.3L6.5 9l4.3-1.7zM19 14l.7 2.3L22 17l-2.3.7L19 20l-.7-2.3L16 17l2.3-.7zM5 15l.7 2.3L8 18l-2.3.7L5 21l-.7-2.3L2 18l2.3-.7z"/>',
+    microphone: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M8 21h8"/>',
+    users: '<path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20M9.5 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM17 10.5a3 3 0 0 0 0-6M21 20v-1.5a4 4 0 0 0-2.5-3.7"/>',
+    book: '<path d="M4 4h7a3 3 0 0 1 3 3v13a3 3 0 0 0-3-3H4zM20 4h-7a3 3 0 0 0-3 3v13a3 3 0 0 1 3-3h7z"/>',
+    search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    bookmark: '<path d="M6 3h12v18l-6-4-6 4z"/>',
+    chevron: '<path d="m6 9 6 6 6-6"/>',
+    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h3"/>',
+    output: '<path d="M5 4h14v16H5z"/><path d="m9 9 3 3-3 3M14 15h2"/>',
+    repeat: '<path d="M17 2l3 3-3 3M4 11V9a4 4 0 0 1 4-4h12M7 22l-3-3 3-3M20 13v2a4 4 0 0 1-4 4H4"/>',
+    lightbulb: '<path d="M9 18h6M10 22h4M8.5 14.5A6 6 0 1 1 15.5 14c-.7.6-1.1 1.4-1.2 2H9.7c-.1-.7-.5-1.4-1.2-1.5Z"/>',
+    check: '<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>'
+  };
+
+  const iconAliases = {
+    overview: 'clipboard', manual: 'clipboard', testing: 'clipboard', selenium: 'browser',
+    java: 'terminal', framework: 'blocks', playwright: 'play', api: 'globe',
+    devops: 'workflow', senior: 'award', reference: 'book', database: 'database',
+    code: 'code', important: 'sparkles', good: 'lightbulb', must: 'alert'
+  };
+
+  function renderIcon(name, className = '') {
+    const resolved = iconAliases[name] || name;
+    const path = iconPaths[resolved] || iconPaths.sparkles;
+    return `<svg class="ui-icon ${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${path}</svg>`;
+  }
+
+  function hydrateStaticIcons() {
+    document.querySelectorAll('[data-icon]').forEach((element) => {
+      element.innerHTML = renderIcon(element.dataset.icon);
+    });
+  }
+
+  function cleanSectionTitle(title) {
+    return String(title || '').replace(/^[\s\u{1F000}-\u{1FAFF}\u2600-\u27BF]+/u, '').trim();
+  }
 
   // DOM refs
   const sidebar = document.getElementById('sidebar');
@@ -32,10 +111,14 @@ const QAApp = (() => {
   const bookmarkFilterBtn = document.getElementById('bookmarkFilter');
   const themeToggle = document.getElementById('themeToggle');
   const focusToggle = document.getElementById('focusToggle');
+  const readerToggle = document.getElementById('readerToggle');
+  const readerPanel = document.getElementById('readerPanel');
 
   // ── Initialize ──
   function init() {
+    hydrateStaticIcons();
     applyTheme(theme);
+    applyTextScale(textScale);
     applyFocusMode(focusMode);
     collectAllQuestions();
     addNavCounts();
@@ -93,10 +176,23 @@ const QAApp = (() => {
     sidebarOverlay.addEventListener('click', () => toggleSidebar(false));
 
     // Theme
-    themeToggle.addEventListener('click', () => {
-      theme = theme === 'dark' ? 'light' : 'dark';
-      applyTheme(theme);
-      localStorage.setItem('qa_theme', theme);
+    themeToggle.addEventListener('click', () => setTheme(supportedThemes[(supportedThemes.indexOf(theme) + 1) % supportedThemes.length]));
+
+    readerToggle?.addEventListener('click', (event) => {
+      event.stopPropagation();
+      setReaderPanel(!readerPanelOpen);
+    });
+
+    readerPanel?.addEventListener('click', (event) => {
+      const themeChoice = event.target.closest('[data-theme-choice]');
+      const scaleChoice = event.target.closest('[data-text-scale-choice]');
+      if (themeChoice) setTheme(themeChoice.dataset.themeChoice);
+      if (scaleChoice) setTextScale(scaleChoice.dataset.textScaleChoice);
+      if (event.target.closest('[data-reader-close]')) setReaderPanel(false);
+    });
+
+    document.addEventListener('click', (event) => {
+      if (readerPanelOpen && !readerPanel?.contains(event.target) && !readerToggle?.contains(event.target)) setReaderPanel(false);
     });
 
     // Focus mode
@@ -143,6 +239,7 @@ const QAApp = (() => {
       if (e.key === 'Escape') {
         toggleSidebar(false);
         closeMockModal();
+        setReaderPanel(false);
       }
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
@@ -156,10 +253,58 @@ const QAApp = (() => {
     document.documentElement.setAttribute('data-theme', t);
     const sun = document.querySelector('.icon-sun');
     const moon = document.querySelector('.icon-moon');
-    if (sun && moon) {
+    const reading = document.querySelector('.icon-reading');
+    if (sun && moon && reading) {
       sun.style.display = t === 'dark' ? 'block' : 'none';
       moon.style.display = t === 'dark' ? 'none' : 'block';
+      reading.style.display = t === 'reading' ? 'block' : 'none';
+      moon.style.display = t === 'light' ? 'block' : 'none';
     }
+    const themeName = { dark: 'Night', light: 'White', reading: 'Read' }[t] || 'Night';
+    if (themeToggle) {
+      themeToggle.title = `Theme: ${themeName}`;
+      themeToggle.setAttribute('aria-label', `Theme: ${themeName}. Change theme`);
+    }
+    updateReaderControls();
+  }
+
+  function setTheme(nextTheme) {
+    if (!supportedThemes.includes(nextTheme)) return;
+    theme = nextTheme;
+    localStorage.setItem('qa_theme', theme);
+    applyTheme(theme);
+  }
+
+  function applyTextScale(scale) {
+    document.documentElement.setAttribute('data-text-scale', scale);
+    updateReaderControls();
+  }
+
+  function setTextScale(nextScale) {
+    if (!['compact', 'comfortable', 'large'].includes(nextScale)) return;
+    textScale = nextScale;
+    localStorage.setItem('qa_text_scale', textScale);
+    applyTextScale(textScale);
+  }
+
+  function setReaderPanel(open) {
+    readerPanelOpen = Boolean(open);
+    if (readerPanel) readerPanel.hidden = !readerPanelOpen;
+    if (readerToggle) readerToggle.setAttribute('aria-expanded', String(readerPanelOpen));
+  }
+
+  function updateReaderControls() {
+    document.querySelectorAll('[data-theme-choice]').forEach(button => {
+      const active = button.dataset.themeChoice === theme;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    document.querySelectorAll('[data-text-scale-choice]').forEach(button => {
+      const active = button.dataset.textScaleChoice === textScale;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    if (readerToggle) readerToggle.title = `Reading preferences · ${textScale} text`;
   }
 
   // ── Sidebar ──
@@ -178,7 +323,7 @@ const QAApp = (() => {
 
     // Update topbar title
     const sec = defined_sections[section];
-    topbarTitle.textContent = sec ? sec.title : section.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    topbarTitle.textContent = sec ? cleanSectionTitle(sec.title) : section.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
     // Show correct section
     document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
@@ -201,13 +346,13 @@ const QAApp = (() => {
 
     const sec = defined_sections[section];
     if (!sec) {
-      panel.innerHTML = `<div class="no-results"><div class="no-results-icon">🚧</div><h3>Coming Soon</h3><p>This section is being prepared with comprehensive content.</p></div>`;
+      panel.innerHTML = `<div class="no-results"><div class="no-results-icon">${renderIcon('workflow')}</div><h3>Coming Soon</h3><p>This section is being prepared with comprehensive content.</p></div>`;
       return panel;
     }
 
     // Handle special section types
     if (sec.type === 'strategy') {
-      panel.innerHTML = `<div class="section-header"><h2>${sec.title}</h2></div>${sec.content}`;
+      panel.innerHTML = `<div class="section-header"><h2>${cleanSectionTitle(sec.title)}</h2></div>${sec.content}`;
       return panel;
     }
 
@@ -227,18 +372,18 @@ const QAApp = (() => {
     let html = `<div class="section-header section-hero-card">
       <div class="section-hero-copy">
         <span class="section-kicker">Senior QA Study Library</span>
-        <h2>${sec.title}</h2>
+        <h2>${cleanSectionTitle(sec.title)}</h2>
         <p>${sec.description || ''}</p>
         <div class="section-stats">
-          <span class="section-stat">📝 ${questions.length} Questions</span>
-          <span class="section-stat">🔴 ${questions.filter(q=>q.importance==='must').length} Must Know</span>
-          <span class="section-stat">🟠 ${questions.filter(q=>q.importance==='important').length} Important</span>
+          <span class="section-stat">${renderIcon('clipboard')} ${questions.length} Questions</span>
+          <span class="section-stat tone-must">${renderIcon('alert')} ${questions.filter(q=>q.importance==='must').length} Must Know</span>
+          <span class="section-stat tone-important">${renderIcon('sparkles')} ${questions.filter(q=>q.importance==='important').length} Important</span>
         </div>
       </div>
       <div class="section-study-tools" data-section-progress="${section}">
         <div class="section-progress-copy"><span>Study progress</span><strong data-section-progress-count>${sectionProgress.done}/${sectionProgress.total}</strong></div>
         <div class="section-progress-track"><span data-section-progress-bar style="width:${sectionProgress.percent}%"></span></div>
-        <button class="section-resume-btn" data-resume-section="${section}">Resume next question <span>→</span></button>
+        <button class="section-resume-btn" data-resume-section="${section}">Resume next question ${renderIcon('arrow')}</button>
       </div>
     </div>
     <div class="questions-container">`;
@@ -261,7 +406,7 @@ const QAApp = (() => {
     const status = progress[q.id] || 'not-started';
     const isBookmarked = bookmarks.includes(q.id);
     const diffLabels = {1:'Beginner',2:'Basic',3:'Intermediate',4:'Advanced',5:'Senior'};
-    const impEmoji = {must:'🔴',important:'🟠',good:'🟡',senior:'🔵'};
+    const impIcon = {must:'alert',important:'sparkles',good:'lightbulb',senior:'award'};
     const impLabels = {must:'MUST KNOW',important:'IMPORTANT',good:'GOOD TO KNOW',senior:'SENIOR LEVEL'};
 
     return `<div class="q-card importance-${q.importance || 'good'}" data-id="${q.id}">
@@ -270,7 +415,7 @@ const QAApp = (() => {
         <div class="q-card-main">
           <div class="q-card-badges">
             <span class="badge badge-diff-${q.difficulty}">${diffLabels[q.difficulty] || 'L'+q.difficulty}</span>
-            <span class="badge badge-${q.importance}">${impEmoji[q.importance] || ''} ${impLabels[q.importance] || q.importance}</span>
+            <span class="badge badge-${q.importance}">${renderIcon(impIcon[q.importance] || 'sparkles')} ${impLabels[q.importance] || q.importance}</span>
             <span class="badge" style="background:var(--bg-glass);color:var(--text-muted)">${q.topic}</span>
           </div>
           <div class="q-question">${q.question}</div>
@@ -279,78 +424,130 @@ const QAApp = (() => {
           <button class="q-bookmark ${isBookmarked ? 'active' : ''}" data-id="${q.id}" title="Bookmark">
             <svg viewBox="0 0 24 24" fill="${isBookmarked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
           </button>
-          <button class="q-expand" title="Expand">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
+          <button class="q-expand" title="Expand">${renderIcon('chevron')}</button>
         </div>
       </div>
       <div class="q-detail">
-        ${q.whyAsked ? `<div class="q-detail-section"><div class="q-detail-label">💡 Why Interviewer Asks This</div><div class="q-detail-content">${formatAnswer(q.whyAsked)}</div></div>` : ''}
+        ${renderQuestionReadingMeta(q)}
+        ${q.whyAsked ? `<div class="q-detail-section">${renderDetailLabel('lightbulb', 'Why Interviewer Asks This')}<div class="q-detail-content">${formatAnswer(q.whyAsked)}</div></div>` : ''}
         
-        ${q.thirtySecAnswer ? `<div class="q-detail-section answer-spotlight"><div class="q-detail-label">⚡ 30-Second Answer</div><div class="q-detail-content">${formatAnswer(q.thirtySecAnswer)}</div></div>` : ''}
+        ${q.thirtySecAnswer ? `<div class="q-detail-section answer-spotlight">${renderDetailLabel('zap', '30-Second Answer')}<div class="q-detail-content">${formatAnswer(q.thirtySecAnswer)}</div></div>` : ''}
         
-        ${q.interviewAnswer ? `<div class="q-detail-section"><div class="q-detail-label">🎯 Interview Answer</div><div class="q-detail-content">${formatAnswer(q.interviewAnswer)}</div></div>` : ''}
+        ${q.interviewAnswer ? `<div class="q-detail-section">${renderDetailLabel('target', 'Interview Answer')}<div class="q-detail-content">${formatAnswer(q.interviewAnswer)}</div></div>` : ''}
         
-        ${q.detailedExplanation ? `<div class="q-detail-section"><div class="q-detail-label">📖 Detailed Explanation</div><div class="q-detail-content">${formatAnswer(q.detailedExplanation)}</div></div>` : ''}
+        ${q.detailedExplanation ? `<div class="q-detail-section">${renderDetailLabel('book', 'Detailed Explanation')}<div class="q-detail-content">${formatAnswer(q.detailedExplanation)}</div></div>` : ''}
         
-        ${q.simpleExplanation ? `<div class="q-detail-section"><div class="q-detail-label">🔑 Simple Explanation</div><div class="q-detail-content">${formatAnswer(q.simpleExplanation)}</div></div>` : ''}
+        ${q.simpleExplanation ? `<div class="q-detail-section">${renderDetailLabel('sparkles', 'Simple Explanation')}<div class="q-detail-content">${formatAnswer(q.simpleExplanation)}</div></div>` : ''}
         
-        ${q.realWorldExample ? `<div class="q-detail-section"><div class="q-detail-label">🌍 Real-World Example</div><div class="q-detail-content">${formatAnswer(q.realWorldExample)}</div></div>` : ''}
+        ${q.realWorldExample ? `<div class="q-detail-section">${renderDetailLabel('globe', 'Real-World Example')}<div class="q-detail-content">${formatAnswer(q.realWorldExample)}</div></div>` : ''}
         
-        ${q.projectExample ? `<div class="q-detail-section"><div class="q-detail-label">💼 Project Example</div><div class="q-detail-content">${formatAnswer(q.projectExample)}</div></div>` : ''}
+        ${q.projectExample ? `<div class="q-detail-section">${renderDetailLabel('file', 'Project Example')}<div class="q-detail-content">${formatAnswer(q.projectExample)}</div></div>` : ''}
         ${q.experienceNote ? `<div class="experience-note"><span>Experience Lens</span><p>${formatAnswer(q.experienceNote)}</p></div>` : ''}
         ${renderConfidenceControls(q)}
         ${renderPersonalNotes(q)}
+        ${q.workflowDiagram ? renderWorkflowDiagram(q.workflowDiagram) : ''}
         
-        ${q.codeCommand ? `<div class="q-detail-section"><div class="q-detail-label">💻 Code / Command</div><div class="code-block"><button class="code-copy" onclick="QAApp.copyCode(this)">Copy</button><code>${escapeHtml(q.codeCommand)}</code></div></div>` : ''}
+        ${q.codeCommand ? `<div class="q-detail-section">${renderDetailLabel('code', 'Code / Command')}<div class="code-block"><button class="code-copy" onclick="QAApp.copyCode(this)">${renderIcon('copy')}<span>Copy</span></button><pre><code>${escapeHtml(q.codeCommand)}</code></pre></div>${q.codeExplanation ? `<div class="code-explanation"><strong>How it works:</strong> ${formatAnswer(q.codeExplanation)}</div>` : ''}</div>` : ''}
         
-        ${q.expectedOutput ? `<div class="q-detail-section"><div class="q-detail-label">📤 Expected Output</div><div class="q-detail-content">${q.expectedOutput}</div></div>` : ''}
+        ${q.expectedOutput ? `<div class="q-detail-section">${renderDetailLabel('output', 'Expected Output')}<div class="q-detail-content">${q.expectedOutput}</div></div>` : ''}
         
-        ${q.followUpQ ? `<div class="followup-box"><div class="q-detail-label">🔄 Follow-Up Question</div><div class="q-detail-content"><strong>${q.followUpQ}</strong></div><div class="q-detail-content" style="margin-top:8px">${formatAnswer(q.followUpA || '')}</div></div>` : ''}
+        ${q.followUpQ ? `<div class="followup-box">${renderDetailLabel('repeat', 'Follow-Up Question')}<div class="q-detail-content"><strong>${q.followUpQ}</strong></div><div class="q-detail-content" style="margin-top:8px">${formatAnswer(q.followUpA || '')}</div></div>` : ''}
         
-        ${q.seniorFollowUpQ ? `<div class="senior-box"><div class="q-detail-label">🏆 Senior-Level Follow-Up</div><div class="q-detail-content"><strong>${q.seniorFollowUpQ}</strong></div><div class="q-detail-content" style="margin-top:8px">${formatAnswer(q.seniorFollowUpA || '')}</div></div>` : ''}
+        ${q.seniorFollowUpQ ? `<div class="senior-box">${renderDetailLabel('award', 'Senior-Level Follow-Up')}<div class="q-detail-content"><strong>${q.seniorFollowUpQ}</strong></div><div class="q-detail-content" style="margin-top:8px">${formatAnswer(q.seniorFollowUpA || '')}</div></div>` : ''}
         
-        ${q.commonMistake ? `<div class="mistake-box"><div class="q-detail-label" style="color:var(--accent-red)">⚠️ Common Mistake</div><div class="q-detail-content">${q.commonMistake}</div></div>` : ''}
+        ${q.commonMistake ? `<div class="mistake-box">${renderDetailLabel('alert', 'Common Mistake', 'tone-red')}<div class="q-detail-content">${q.commonMistake}</div></div>` : ''}
         
-        ${q.bestPractice ? `<div class="practice-box"><div class="q-detail-label" style="color:var(--accent-green)">✅ Best Practice</div><div class="q-detail-content">${q.bestPractice}</div></div>` : ''}
+        ${q.bestPractice ? `<div class="practice-box">${renderDetailLabel('check', 'Best Practice', 'tone-green')}<div class="q-detail-content">${q.bestPractice}</div></div>` : ''}
       </div>
     </div>`;
+  }
+
+  function renderQuestionReadingMeta(q) {
+    const answerLayers = [
+      q.whyAsked,
+      q.thirtySecAnswer,
+      q.interviewAnswer,
+      q.detailedExplanation,
+      q.simpleExplanation,
+      q.realWorldExample,
+      q.projectExample,
+      q.followUpA,
+      q.seniorFollowUpA
+    ].filter(Boolean);
+    const wordCount = answerLayers.join(' ').trim().split(/\s+/).filter(Boolean).length;
+    const minutes = Math.max(1, Math.min(9, Math.ceil(wordCount / 185)));
+    const depth = q.difficulty >= 4 ? 'Senior depth' : q.difficulty >= 3 ? 'Practical depth' : 'Core depth';
+
+    return `<div class="q-reading-meta" aria-label="Reading guidance">
+      <span>${renderIcon('timer')} ${minutes} min focused read</span>
+      <span>${renderIcon('layers')} ${answerLayers.length} answer layers</span>
+      <span>${renderIcon('target')} ${depth}</span>
+    </div>`;
+  }
+
+  function renderDetailLabel(iconName, label, toneClass = '') {
+    return `<div class="q-detail-label ${toneClass}">${renderIcon(iconName)}<span>${label}</span></div>`;
+  }
+
+  function renderWorkflowDiagram(diagram) {
+    const steps = Array.isArray(diagram.steps) ? diagram.steps.slice(0, 6) : [];
+    if (steps.length < 2) return '';
+    const key = escapeHtml(diagram.key || 'manual');
+    const title = escapeHtml(diagram.title || 'Workflow map');
+    const purpose = escapeHtml(diagram.purpose || 'Follow the sequence and explain your decision at every stage.');
+    const stepHtml = steps.map((step, index) => {
+      const arrow = index < steps.length - 1 ? `<span class="workflow-arrow">${renderIcon('arrow')}</span>` : '';
+      return `<div class="workflow-step"><span class="workflow-step-index">${String(index + 1).padStart(2, '0')}</span><span>${escapeHtml(step)}</span></div>${arrow}`;
+    }).join('');
+    return `<section class="workflow-card workflow-${key}" aria-label="${title}">
+      <div class="workflow-heading">
+        <span class="workflow-icon">${renderIcon('workflow')}</span>
+        <div><span class="workflow-kicker">Workflow map</span><h4>${title}</h4></div>
+        <span class="workflow-steps-count">${steps.length} steps</span>
+      </div>
+      <div class="workflow-steps">${stepHtml}</div>
+      <p>${purpose}</p>
+    </section>`;
   }
 
   // ── Format Answer ──
   function formatAnswer(text) {
     if (!text) return '';
-    text = escapeHtml(String(text));
-    
-    // Quick Markdown Table Parser for Side-by-Side Comparisons
-    if (text.includes('|')) {
-      const lines = text.split('\n');
-      let inTable = false;
-      let htmlLines = [];
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (line.startsWith('|') && line.endsWith('|')) {
-          if (!inTable) { htmlLines.push('<table class="matrix-table" style="margin-top:10px; width:100%">'); inTable = true; }
-          if (line.includes(':---')) continue; // Skip markdown separator row
-          const isHeader = i < lines.length - 1 && lines[i+1].includes(':---');
-          const tag = isHeader ? 'th' : 'td';
-          const cells = line.split('|').slice(1, -1).map(c => `<${tag}>${c.trim()}</${tag}>`).join('');
-          htmlLines.push(`<tr>${cells}</tr>`);
-        } else {
-          if (inTable) { htmlLines.push('</table>'); inTable = false; }
-          htmlLines.push(line);
-        }
-      }
-      if (inTable) { htmlLines.push('</table>'); }
-      text = htmlLines.join('\n');
-    }
+    const lines = escapeHtml(String(text)).split('\n');
+    const blocks = [];
+    let tableRows = [];
 
-    return text
+    const formatInline = (value) => value
       .replace(/\*\*(.*?)\*\*/g, '<strong class="key-term">$1</strong>')
       .replace(/\b(Risk|Impact|Decision|Action|Result|Critical|Production|Quality Gate|Root Cause|Always|Never)\b/gi, '<mark class="important-word">$1</mark>')
-      .replace(/`(.*?)`/g, '<code style="background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);font-size:13px">$1</code>')
-      .replace(/\n/g, '<br>')
-      .replace(/<\/table><br>/g, '</table>'); // Fix extra breaks after table
+      .replace(/`(.*?)`/g, '<code style="background:var(--code-bg);padding:2px 6px;border-radius:4px;font-family:var(--font-mono);font-size:13px">$1</code>');
+
+    const flushTable = () => {
+      if (!tableRows.length) return;
+      const [header, ...body] = tableRows;
+      const headerHtml = header.map(cell => `<th scope="col">${formatInline(cell)}</th>`).join('');
+      const bodyHtml = body.map(row => `<tr>${row.map(cell => `<td>${formatInline(cell)}</td>`).join('')}</tr>`).join('');
+      blocks.push(`<div class="comparison-table-wrap"><table class="matrix-table comparison-table"><thead><tr>${headerHtml}</tr></thead><tbody>${bodyHtml}</tbody></table></div>`);
+      tableRows = [];
+    };
+
+    lines.forEach((rawLine) => {
+      const line = rawLine.trim();
+      const isTableRow = line.startsWith('|') && line.endsWith('|');
+      const isDivider = /^\|\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|$/.test(line);
+
+      if (isTableRow) {
+        if (!isDivider) tableRows.push(line.split('|').slice(1, -1).map(cell => cell.trim()));
+        return;
+      }
+
+      flushTable();
+      if (!line) return;
+      const className = /^SIDE-BY-SIDE COMPARISON:?$/i.test(line) ? ' class="comparison-kicker"' : '';
+      blocks.push(`<p${className}>${formatInline(line)}</p>`);
+    });
+    flushTable();
+    return blocks.join('');
   }
 
   function escapeHtml(text) {
@@ -649,6 +846,16 @@ const QAApp = (() => {
   function bindDashboardEvents() {
     const dashboard = document.getElementById('section-dashboard');
     if (!dashboard) return;
+    const dailyGoalInput = dashboard.querySelector('#dailyGoalInput');
+    if (dailyGoalInput) {
+      dailyGoalInput.addEventListener('input', event => {
+        if (event.target.value !== '') setDailyGoal(event.target.value);
+      });
+      dailyGoalInput.addEventListener('change', event => {
+        setDailyGoal(event.target.value);
+        confirmDailyGoal();
+      });
+    }
     dashboard.addEventListener('click', event => {
       const reviewButton = event.target.closest('[data-review-question]');
       if (reviewButton) openReviewQuestion(reviewButton.dataset.reviewQuestion);
@@ -657,14 +864,19 @@ const QAApp = (() => {
       if (action === 'import') document.getElementById('studyImportInput')?.click();
     });
     dashboard.addEventListener('change', event => {
-      if (event.target.id === 'dailyGoalInput') {
-        dailyGoal = Math.min(50, Math.max(1, Number(event.target.value) || 5));
-        localStorage.setItem('qa_daily_goal', String(dailyGoal));
-        renderStudyDashboard();
-        showToast(`Daily goal set to ${dailyGoal} questions`);
-      }
       if (event.target.id === 'studyImportInput' && event.target.files?.[0]) importStudyBackup(event.target.files[0]);
     });
+  }
+
+  function setDailyGoal(value) {
+    if (value === '') return;
+    dailyGoal = Math.min(50, Math.max(1, Number(value) || 5));
+    localStorage.setItem('qa_daily_goal', String(dailyGoal));
+    renderStudyDashboard();
+  }
+
+  function confirmDailyGoal() {
+    showToast(`Daily goal set to ${dailyGoal} questions`);
   }
 
   function exportStudyBackup() {
@@ -713,7 +925,7 @@ const QAApp = (() => {
   }
 
   function renderPrepPlan(sec) {
-    let html = `<div class="section-header"><h2>${sec.title}</h2><p>Follow this structured 30-day plan to systematically prepare for your interview.</p></div>`;
+    let html = `<div class="section-header"><h2>${cleanSectionTitle(sec.title)}</h2><p>Follow this structured 30-day plan to systematically prepare for your interview.</p></div>`;
     sec.days.forEach(d => {
       const checked = dayChecks[d.day] || false;
       html += `<div class="day-card">
@@ -741,7 +953,7 @@ const QAApp = (() => {
 
   // ── Render Skill Matrix ──
   function renderSkillMatrix(sec) {
-    let html = `<div class="section-header"><h2>${sec.title}</h2><p>What interviewers expect at 7-8 years vs 2 years of experience.</p></div>`;
+    let html = `<div class="section-header"><h2>${cleanSectionTitle(sec.title)}</h2><p>What interviewers expect at 7-8 years vs 2 years of experience.</p></div>`;
     html += `<table class="matrix-table">
       <thead><tr><th>Skill</th><th>Expected Level</th><th>2-Year Candidate</th><th>7-8 Year Candidate</th></tr></thead>
       <tbody>`;
@@ -775,7 +987,7 @@ const QAApp = (() => {
         const done = sec.questions.filter(q => progress[q.id] === 'done').length;
         const pct = total > 0 ? Math.round((done / total) * 100) : 0;
         html += `<div class="topic-progress-item">
-          <span class="tp-label">${sec.title.replace(/^[^\w]*/, '').substring(0, 20)}</span>
+          <span class="tp-label">${cleanSectionTitle(sec.title).substring(0, 20)}</span>
           <div class="tp-bar"><div class="tp-fill" style="width:${pct}%"></div></div>
           <span class="tp-pct">${pct}%</span>
         </div>`;
@@ -790,12 +1002,13 @@ const QAApp = (() => {
       allQuestions.forEach(q => { if (counts[q.importance] !== undefined) counts[q.importance]++; });
       const total = allQuestions.length || 1;
       const colors = { must: 'var(--importance-must)', important: 'var(--importance-important)', good: 'var(--importance-good)', senior: 'var(--importance-senior)' };
-      const labels = { must: '🔴 Must Know', important: '🟠 Important', good: '🟡 Good to Know', senior: '🔵 Senior Level' };
+      const labels = { must: 'Must Know', important: 'Important', good: 'Good to Know', senior: 'Senior Level' };
+      const labelIcons = { must: 'alert', important: 'sparkles', good: 'lightbulb', senior: 'award' };
       let html = '';
       for (const key in counts) {
         const pct = Math.round((counts[key] / total) * 100);
         html += `<div class="imp-bar-row">
-          <span class="imp-bar-label">${labels[key]}</span>
+          <span class="imp-bar-label">${renderIcon(labelIcons[key])}${labels[key]}</span>
           <div class="imp-bar-track"><div class="imp-bar-fill" style="width:${pct}%;background:${colors[key]}"></div></div>
           <span class="imp-bar-count">${counts[key]}</span>
         </div>`;
@@ -827,14 +1040,14 @@ const QAApp = (() => {
     searchInfo.textContent = `Found ${results.length} results for "${query}"`;
     
     if (results.length === 0) {
-      container.innerHTML = `<div class="no-results"><div class="no-results-icon">🔍</div><h3>No results found</h3><p>Try different keywords or browse sections from the sidebar.</p></div>`;
+      container.innerHTML = `<div class="no-results"><div class="no-results-icon">${renderIcon('search')}</div><h3>No results found</h3><p>Try different keywords or browse sections from the sidebar.</p></div>`;
     } else {
       container.innerHTML = results.map(q => renderQuestionCard(q)).join('');
       bindCardEvents(container);
     }
     
     searchPanel.classList.add('active');
-    topbarTitle.textContent = '🔍 Search Results';
+    topbarTitle.textContent = 'Search Results';
   }
 
   // ── Filters ──
@@ -873,12 +1086,12 @@ const QAApp = (() => {
     searchInfo.textContent = `${results.length} bookmarked questions`;
     container.innerHTML = results.length > 0 
       ? results.map(q => renderQuestionCard(q)).join('')
-      : `<div class="no-results"><div class="no-results-icon">⭐</div><h3>No bookmarks yet</h3><p>Click the bookmark icon on any question to save it for quick access.</p></div>`;
+      : `<div class="no-results"><div class="no-results-icon">${renderIcon('bookmark')}</div><h3>No bookmarks yet</h3><p>Click the bookmark icon on any question to save it for quick access.</p></div>`;
     
     if (results.length > 0) bindCardEvents(container);
     
     searchPanel.classList.add('active');
-    topbarTitle.textContent = '⭐ Bookmarked Questions';
+    topbarTitle.textContent = 'Bookmarked Questions';
   }
 
   // ── Progress ──
@@ -958,8 +1171,8 @@ const QAApp = (() => {
   function copyCode(btn) {
     const code = btn.parentElement.querySelector('code');
     navigator.clipboard.writeText(code.textContent).then(() => {
-      btn.textContent = 'Copied!';
-      setTimeout(() => btn.textContent = 'Copy', 2000);
+      btn.innerHTML = `${renderIcon('check')}<span>Copied</span>`;
+      setTimeout(() => { btn.innerHTML = `${renderIcon('copy')}<span>Copy</span>`; }, 2000);
     });
   }
 
@@ -979,7 +1192,9 @@ const QAApp = (() => {
     copyCode,
     showToast,
     resumeSection,
-    toggleFocusMode
+    toggleFocusMode,
+    setDailyGoal,
+    confirmDailyGoal
   };
 })();
 

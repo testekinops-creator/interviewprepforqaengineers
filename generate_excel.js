@@ -10,7 +10,11 @@ async function generateExcel() {
     const finalPacks = [
         'zz-curriculum-expansions.js',
         'zz-senior-depth.js',
-        'zz-coverage-completion.js'
+        'zz-coverage-completion.js',
+        'zz-company-interview-additions.js',
+        'zz-guide-gap-additions.js',
+        'zz-code-quality-overrides.js',
+        'zz-workflow-diagrams.js'
     ];
     const files = fs.readdirSync(dataDir)
         .filter(f => f.endsWith('.js'))
